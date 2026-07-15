@@ -154,7 +154,6 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
             if st.button("🗑️", key=f"del_zone_{zone}"):
                 c_config.drop(zone, inplace=True)
                 st.session_state.modified_z_infl = True
-                st.rerun()
 
     # --- Bouton de validation globale ---
     if st.session_state.modified_z_infl:
