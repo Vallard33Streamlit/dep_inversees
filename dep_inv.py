@@ -25,7 +25,7 @@ def load_countries_config():
 
     countries_config["country"] = True
     countries_config["zone"] = np.nan
-    l_ue = [276, 40, 6, 100, 196, 191, 208, 724, 233, 246, 251, 300, 348, 372, 380, 428, 440, 442, 470, 528, 616, 620, 642, 703, 705, 752, 203]
+    l_ue = [276, 40, 56, 100, 196, 191, 208, 724, 233, 246, 251, 300, 348, 372, 380, 428, 440, 442, 470, 528, 616, 620, 642, 703, 705, 752, 203]
     countries_config.loc[1000] = 1000, "UE", False, np.nan
     countries_config.loc[countries_config['country_code'].isin(set(l_ue)), "zone"] = 1000
     return countries_config
