@@ -3,6 +3,10 @@ import pandas as pd
 import numpy as np
 from copy import deepcopy
 
+vesrion_baci = "2026"
+annee_baci = "2024"
+version_hs6 = "2022"
+
 st.set_page_config(layout="wide")
 # --- 1. Initialisation des données (cachée) ---
 st.header("Dépendances inversées")
@@ -77,15 +81,15 @@ def calc_var(type, country=0):
     df_tot[f"hhi_{type}_{type2}"] /= (df_tot[f"v_{type}_{type2}"]**2)
     for col in df_tot.columns:
         if col[0] == "p":
-            df_tot[col] = df_tot[col].fillna(0) / df_tot[f"v_{type}_{type2}"]
+            df_tot[col] = df_tot[col].fillna(0) / df_tot[f"v_{type}_{type2}"] * 100
 
     df_tot = df_tot.merge(baci3.loc[baci3[y] == st.session_state.fr_ue, ["k", "v"]].groupby("k").sum().reset_index().rename(columns={"v":f"p_{type_o}_fr_ue_{type}_{type2}"}), how="outer")
-    df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"] = df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"].fillna(0) / df_tot[f"v_{type}_{type2}"]
+    df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"] = df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"].fillna(0) / df_tot[f"v_{type}_{type2}"] * 100
     
     if country != 0:
         baci4 = st.session_state.baci2[st.session_state.baci2[y] == st.session_state.fr_ue]
         temp = baci4[baci4[x] == country].merge(baci4.groupby("k")["v"].sum().rename("v_sum").reset_index(), how="outer")
-        temp[f"p_{type}_{type2}_{type_o}_fr_ue"] = temp["v"].fillna(0) / temp["v_sum"]
+        temp[f"p_{type}_{type2}_{type_o}_fr_ue"] = temp["v"].fillna(0) / temp["v_sum"] * 100
         df_tot = df_tot.merge(temp[["k", f"p_{type}_{type2}_{type_o}_fr_ue"]], how="outer")
     return df_tot
 
@@ -200,35 +204,35 @@ if not st.session_state.modified_z_infl:
                 st.session_state.df_final["Code HS4"] = st.session_state.df_final["Code HS6"].apply(lambda x : x[:4])
                 st.session_state.df_final = st.session_state.df_final.merge(labels.rename(columns={"Code HS6":"Code HS4", "Label HS6":"Label HS4"}), how="left")
                 st.session_state.df_final.columns = ["Code HS6", "Importations du pays", "Quantités importées du pays", "HHi des importations du pays",
-                    "Part du premier exportateur dans les importations du pays", "Part du deuxième exportateur dans les importations du pays", "Part du troisième exportateur dans les importations du pays", 
+                    "Part du premier exportateur dans les importations du pays (en %)", "Part du deuxième exportateur dans les importations du pays (en %)", "Part du troisième exportateur dans les importations du pays (en %)", 
                     "Premier exportateur dans les importations du pays", "Deuxième exportateur dans les importations du pays", "Troisième exportateur dans les importations du pays", 
-                    f"Part des exportations de {st.session_state.fr_ue_lab} dans les importations du pays", f"Part des importations du pays dans les exportations de {st.session_state.fr_ue_lab}", 
+                    f"Part des exportations de {st.session_state.fr_ue_lab} dans les importations du pays (en %)", f"Part des importations du pays dans les exportations de {st.session_state.fr_ue_lab} (en %)", 
                     "Exportations du pays", "Quantités exportées du pays", "HHi des exportations du pays",
-                    "Part du premier importateur dans les exportations du pays", "Part du deuxième importateur dans les exportations du pays", "Part du troisième importateur dans les exportations du pays", 
+                    "Part du premier importateur dans les exportations du pays (en %)", "Part du deuxième importateur dans les exportations du pays (en %)", "Part du troisième importateur dans les exportations du pays (en %)", 
                     "Premier importateur dans les exportations du pays", "Deuxième importateur dans les exportations du pays", "Troisième importateur dans les exportations du pays",
-                    f"Part des importations de {st.session_state.fr_ue_lab} dans les exportations du pays", f"Part des exportations du pays dans les importations de {st.session_state.fr_ue_lab}", 
+                    f"Part des importations de {st.session_state.fr_ue_lab} dans les exportations du pays (en %)", f"Part des exportations du pays dans les importations de {st.session_state.fr_ue_lab} (en %)", 
                     "Valeur des flux échangés dans le monde", "Quantités échangées dans le monde", "HHi des exportations mondiales",
-                    "Part du premier exportateur mondial", "Part du deuxième exportateur mondial", "Part du troisième exportateur mondial",
+                    "Part du premier exportateur mondial (en %)", "Part du deuxième exportateur mondial (en %)", "Part du troisième exportateur mondial (en %)",
                     "Premier exportateur mondial", "Deuxième exportateur mondial", "Troisième exportateur mondial",
-                    f"Part des exportations de {st.session_state.fr_ue_lab} dans le monde",
+                    f"Part des exportations de {st.session_state.fr_ue_lab} dans le monde (en %)",
                     "a supprimer", "a supprimer 2", "HHi des importations mondiales",
-                    "Part du premier importateur mondial", "Part du deuxième importateur mondial", "Part du troisième importateur mondial",
+                    "Part du premier importateur mondial (en %)", "Part du deuxième importateur mondial (en %)", "Part du troisième importateur mondial (en %)",
                     "Premier importateur mondial", "Deuxième importateur mondial", "Troisième importateur mondial",
-                    f"Part des importations de {st.session_state.fr_ue_lab} dans le monde",
+                    f"Part des importations de {st.session_state.fr_ue_lab} dans le monde (en %)",
                     "Label HS6", "Code HS4", "Label HS4"]
                 l_cols = ["Code HS6", "Label HS6",
-                    f"Part des exportations de {st.session_state.fr_ue_lab} dans les importations du pays", f"Part des importations du pays dans les exportations de {st.session_state.fr_ue_lab}", "HHi des importations du pays",
-                    f"Part des importations de {st.session_state.fr_ue_lab} dans les exportations du pays", f"Part des exportations du pays dans les importations de {st.session_state.fr_ue_lab}", "HHi des exportations du pays",
+                    f"Part des exportations de {st.session_state.fr_ue_lab} dans les importations du pays (en %)", f"Part des importations du pays dans les exportations de {st.session_state.fr_ue_lab} (en %)", "HHi des importations du pays",
+                    f"Part des importations de {st.session_state.fr_ue_lab} dans les exportations du pays (en %)", f"Part des exportations du pays dans les importations de {st.session_state.fr_ue_lab} (en %)", "HHi des exportations du pays",
                     "HHi des exportations mondiales", "HHi des importations mondiales",
                     "Importations du pays", "Quantités importées du pays",
                     "Exportations du pays", "Quantités exportées du pays",
                     "Valeur des flux échangés dans le monde", "Quantités échangées dans le monde",
-                    f"Part des exportations de {st.session_state.fr_ue_lab} dans le monde", f"Part des importations de {st.session_state.fr_ue_lab} dans le monde",
+                    f"Part des exportations de {st.session_state.fr_ue_lab} dans le monde (en %)", f"Part des importations de {st.session_state.fr_ue_lab} dans le monde (en %)",
                     "Code HS4", "Label HS4",
-                    "Part du premier exportateur dans les importations du pays", "Part du deuxième exportateur dans les importations du pays", "Part du troisième exportateur dans les importations du pays",          
-                    "Part du premier importateur dans les exportations du pays", "Part du deuxième importateur dans les exportations du pays", "Part du troisième importateur dans les exportations du pays", 
-                    "Part du premier exportateur mondial", "Part du deuxième exportateur mondial", "Part du troisième exportateur mondial",
-                    "Part du premier importateur mondial", "Part du deuxième importateur mondial", "Part du troisième importateur mondial",
+                    "Part du premier exportateur dans les importations du pays (en %)", "Part du deuxième exportateur dans les importations du pays (en %)", "Part du troisième exportateur dans les importations du pays (en %)",          
+                    "Part du premier importateur dans les exportations du pays (en %)", "Part du deuxième importateur dans les exportations du pays (en %)", "Part du troisième importateur dans les exportations du pays (en %)", 
+                    "Part du premier exportateur mondial (en %)", "Part du deuxième exportateur mondial (en %)", "Part du troisième exportateur mondial (en %)",
+                    "Part du premier importateur mondial (en %)", "Part du deuxième importateur mondial (en %)", "Part du troisième importateur mondial (en %)",
                     "Premier exportateur dans les importations du pays", "Deuxième exportateur dans les importations du pays", "Troisième exportateur dans les importations du pays", 
                     "Premier importateur dans les exportations du pays", "Deuxième importateur dans les exportations du pays", "Troisième importateur dans les exportations du pays", 
                     "Premier exportateur mondial", "Deuxième exportateur mondial", "Troisième exportateur mondial",
@@ -251,38 +255,38 @@ if not st.session_state.modified_z_infl:
             type, type2 = "exp", "imp"
         if type_filter != "Tous":
             l_cols_2 = ["Code HS6", "Label HS6",
-                f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays", f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}", f"HHi des {type}ortations du pays",
+                f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)", f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)", f"HHi des {type}ortations du pays",
                 f"HHi des {type2}ortations mondiales", f"{maj(type)}ortations du pays", f"Quantités {type}ortées du pays", f"{maj(type2)}ortations du pays", f"Quantités {type2}ortées du pays",
                 "Valeur des flux échangés dans le monde", "Quantités échangées dans le monde",
-                f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans le monde",
+                f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans le monde (en %)",
                 "Code HS4", "Label HS4",
-                f"Part du premier {type2}ortateur dans les {type}ortations du pays", f"Part du deuxième {type2}ortateur dans les {type}ortations du pays", f"Part du troisième {type2}ortateur dans les {type}ortations du pays",          
-                f"Part du premier {type2}ortateur mondial", f"Part du deuxième {type2}ortateur mondial", f"Part du troisième {type2}ortateur mondial",
+                f"Part du premier {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du deuxième {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du troisième {type2}ortateur dans les {type}ortations du pays (en %)",          
+                f"Part du premier {type2}ortateur mondial (en %)", f"Part du deuxième {type2}ortateur mondial (en %)", f"Part du troisième {type2}ortateur mondial (en %)",
                 f"Premier {type2}ortateur dans les {type}ortations du pays", f"Deuxième {type2}ortateur dans les {type}ortations du pays", f"Troisième {type2}ortateur dans les {type}ortations du pays", 
                 f"Premier {type2}ortateur mondial", f"Deuxième {type2}ortateur mondial", f"Troisième {type2}ortateur mondial"]
 
             df_final_mod = df_final_mod[(df_final_mod[f"{maj(type)}ortations du pays"] >= df_final_mod[f"{maj(type2)}ortations du pays"])&(df_final_mod[f"{maj(type)}ortations du pays"] > 0)]
             df_final_mod = df_final_mod[l_cols_2]
         
-            filter_by_hhi_c = st.checkbox(f"Filtrer les produits selon l'indice HHi des {type}ortations du pays", key="filter_by_hhi_c")
+            filter_by_hhi_c = st.checkbox(f"Filtrer les produits selon l'indice HHi des {type}ortations du pays", key="filter_by_hhi_c", help=f"Est-ce que les {type}ortations du pays sont concentrées ?")
             if filter_by_hhi_c:
                 hhi_c = st.slider(f"HHi des {type}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
                 df_final_mod = df_final_mod[df_final_mod[f"HHi des {type}ortations du pays"] >= hhi_c]
 
-            filter_by_hhi_m = st.checkbox(f"Filtrer les produits selon l'indice HHi mondial des {type2}ortations", key="filter_by_hhi_m")
+            filter_by_hhi_m = st.checkbox(f"Filtrer les produits selon l'indice HHi mondial des {type2}ortations", key="filter_by_hhi_m", help=f"Est-ce que le marché des {type2}ortateurs est concentré ?")
             if filter_by_hhi_m:
                 hhi_M = st.slider(f"HHi mondial des {type2}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
                 df_final_mod = df_final_mod[df_final_mod[f"HHi des {type2}ortations mondiales"] >= hhi_M]
 
-            filter_by_p_fr_ue_in_c = st.checkbox(f"Filtrer les produits selon la part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays", key="filter_by_p_fr_ue_in_c")
+            filter_by_p_fr_ue_in_c = st.checkbox(f"Filtrer les produits selon la part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays", key="filter_by_p_fr_ue_in_c", help="À quel point on peut faire mal ?")
             if filter_by_p_fr_ue_in_c:
-                p_fr_ue_in_c = st.slider(f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à :", min_value=0.0, max_value=1.0, value=0.1, step=0.01, format="%.2f")
-                df_final_mod = df_final_mod[df_final_mod[f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays"] >= p_fr_ue_in_c]
+                p_fr_ue_in_c = st.slider(f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à :", min_value=0, max_value=100, value=10, step=1, format="%d %%")
+                df_final_mod = df_final_mod[df_final_mod[f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)"] >= p_fr_ue_in_c]
 
-            filter_by_p_c_in_fr_ue = st.checkbox(f"Filtrer les produits selon la part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}", key="filter_by_p_c_in_fr_ue")
+            filter_by_p_c_in_fr_ue = st.checkbox(f"Filtrer les produits selon la part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}", key="filter_by_p_c_in_fr_ue", help="À quel point on se fait mal ?")
             if filter_by_p_c_in_fr_ue:
-                p_c_in_fr_ue = st.slider(f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à :", min_value=0.0, max_value=1.0, value=0.5, step=0.01, format="%.2f")
-                df_final_mod = df_final_mod[df_final_mod[f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}"] <= p_c_in_fr_ue]
+                p_c_in_fr_ue = st.slider(f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
+                df_final_mod = df_final_mod[df_final_mod[f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)"] <= p_c_in_fr_ue]
 
             log_values = np.linspace(-3, 6, 901)
             filter_by_v = st.checkbox(f"Filtrer les produits selon le montant des {type}ortations du pays ", key="filter_by_v")
