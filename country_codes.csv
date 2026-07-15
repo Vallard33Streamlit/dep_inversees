@@ -1,0 +1,239 @@
+country_code;country_name;country_iso2;country_iso3;nom_pays
+4;Afghanistan;AF;AFG;Afghanistan
+8;Albania;AL;ALB;Albanie
+12;Algeria;DZ;DZA;Algérie
+16;American Samoa;AS;ASM;Samoa américaines
+20;Andorra;AD;AND;Andorre
+24;Angola;AO;AGO;Angola
+28;Antigua and Barbuda;AG;ATG;Antigua-et-Barbuda
+31;Azerbaijan;AZ;AZE;Azerbaïdjan
+32;Argentina;AR;ARG;Argentine
+36;Australia;AU;AUS;Australie
+40;Austria;AT;AUT;Autriche
+44;Bahamas;BS;BHS;Bahamas
+48;Bahrain;BH;BHR;Bahreïn
+50;Bangladesh;BD;BGD;Bangladesh
+51;Armenia;AM;ARM;Arménie
+52;Barbados;BB;BRB;Barbade
+56;Belgium;BE;BEL;Belgique
+58;Belgium-Luxembourg (...1998);BE;BEL;Belgique-Luxembourg (... 1998)
+60;Bermuda;BM;BMU;Bermudes
+64;Bhutan;BT;BTN;Bhoutan
+68;Bolivia (Plurinational State of);BO;BOL;Bolivie (État plurinational de)
+70;Bosnia Herzegovina;BA;BIH;Bosnie-Herzégovine
+72;Botswana;BW;BWA;Botswana
+76;Brazil;BR;BRA;Brésil
+84;Belize;BZ;BLZ;Belize
+86;Br. Indian Ocean Terr.;IO;IOT;Territoire britannique de l'océan Indien
+90;Solomon Isds;SB;SLB;Îles Salomon
+92;Br. Virgin Isds;VG;VGB;Îles Vierges britanniques
+96;Brunei Darussalam;BN;BRN;Brunei
+100;Bulgaria;BG;BGR;Bulgarie
+104;Myanmar;MM;MMR;Myanmar (Birmanie)
+108;Burundi;BI;BDI;Burundi
+112;Belarus;BY;BLR;Biélorussie
+116;Cambodia;KH;KHM;Cambodge
+120;Cameroon;CM;CMR;Cameroun
+124;Canada;CA;CAN;Canada
+132;Cabo Verde;CV;CPV;Cap-Vert
+136;Cayman Isds;KY;CYM;Îles Caîmans
+140;Central African Rep.;CF;CAF;République centrafricaine
+144;Sri Lanka;LK;LKA;Sri Lanka
+148;Chad;TD;TCD;Tchad
+152;Chile;CL;CHL;Chili
+156;China;CN;CHN;Chine
+162;Christmas Isds;CX;CXR;Île Christmas
+166;Cocos Isds;CC;CCK;Îles Cocos (Keeling)
+170;Colombia;CO;COL;Colombie
+174;Comoros;KM;COM;Comores
+175;Mayotte (Overseas France);YT;MYT;Mayotte (France d'outre-mer)
+178;Congo;CG;COG;Congo
+180;Dem. Rep. of the Congo;CD;COD;République démocratique du Congo
+184;Cook Isds;CK;COK;Îles Cook
+188;Costa Rica;CR;CRI;Costa Rica
+191;Croatia;HR;HRV;Croatie
+192;Cuba;CU;CUB;Cuba
+196;Cyprus;CY;CYP;Chypre
+200;Czechoslovakia (...1992);CS;CSK;Tchécoslovaquie (... 1992)
+203;Czechia;CZ;CZE;Tchéquie
+204;Benin;BJ;BEN;B"nin
+208;Denmark;DK;DNK;Danemark
+212;Dominica;DM;DMA;Dominique
+214;Dominican Rep.;DO;DOM;R"�"publique dominicaine
+218;Ecuador;EC;ECU;Équateur
+222;El Salvador;SV;SLV;Salvador
+226;Equatorial Guinea;GQ;GNQ;Guinée Équatoriale
+231;Ethiopia;ET;ETH;Éthiopie
+232;Eritrea;ER;ERI;Érythrée
+233;Estonia;EE;EST;Estonie
+238;Falkland Isds (Malvinas);FK;FLK;Îles Malouines (Falkland)
+242;Fiji;FJ;FJI;Fidji
+246;Finland;FI;FIN;Finlande
+251;France;FR;FRA;France
+258;French Polynesia;PF;PYF;Polynésie française
+260;Fr. South Antarctic Terr.;TF;ATF;Terres australes françaises
+262;Djibouti;DJ;DJI;Djibouti
+266;Gabon;GA;GAB;Gabon
+268;Georgia;GE;GEO;Géorgie
+270;Gambia;GM;GMB;Gambie
+275;State of Palestine;PS;PSE;État de Palestine
+276;Germany;DE;DEU;Allemagne
+278;Dem. Rep. of Germany (...1990);DD;DDR;République démocratique allemande (... 1990)
+280;Fed. Rep. of Germany (...1990);DE;DEU;République fédérale d'Allemagne (... 1990)
+288;Ghana;GH;GHA;Ghana
+292;Gibraltar;GI;GIB;Gibraltar
+296;Kiribati;KI;KIR;Kiribati
+300;Greece;GR;GRC;Grèce
+304;Greenland;GL;GRL;Groenland
+308;Grenada;GD;GRD;Grenade
+316;Guam;GU;GUM;Guam
+320;Guatemala;GT;GTM;Guatemala
+324;Guinea;GN;GIN;Guinée
+328;Guyana;GY;GUY;Guyana
+332;Haiti;HT;HTI;Haïti
+340;Honduras;HN;HND;Honduras
+344;China, Hong Kong SAR;HK;HKG;Chine, Région administrative spéciale de Hong Kong
+348;Hungary;HU;HUN;Hongrie
+352;Iceland;IS;ISL;Islande
+360;Indonesia;ID;IDN;Indonésie
+364;Iran;IR;IRN;Iran
+368;Iraq;IQ;IRQ;Irak
+372;Ireland;IE;IRL;Irlande
+376;Israel;IL;ISR;Israël
+380;Italy;IT;ITA;Italie
+384;CÃ´te d'Ivoire;CI;CIV;Côte d'Ivoire
+388;Jamaica;JM;JAM;Jamaïque
+392;Japan;JP;JPN;Japon
+398;Kazakhstan;KZ;KAZ;Kazakhstan
+400;Jordan;JO;JOR;Jordanie
+404;Kenya;KE;KEN;Kenya
+408;Dem. People's Rep. of Korea;KP;PRK;République populaire démocratique de Corée
+410;Rep. of Korea;KR;KOR;République de Corée
+414;Kuwait;KW;KWT;Koweït
+417;Kyrgyzstan;KG;KGZ;Kirghizistan
+418;Lao People's Dem. Rep.;LA;LAO;République démocratique populaire lao
+422;Lebanon;LB;LBN;Liban
+426;Lesotho;LS;LSO;Lesotho
+428;Latvia;LV;LVA;Lettonie
+430;Liberia;LR;LBR;Libéria
+434;Libya;LY;LBY;Libye
+440;Lithuania;LT;LTU;Lituanie
+442;Luxembourg;LU;LUX;Luxembourg
+446;China, Macao SAR;MO;MAC;Chine, Région administrative spéciale de Macao
+450;Madagascar;MG;MDG;Madagascar
+454;Malawi;MW;MWI;Malawi
+458;Malaysia;MY;MYS;Malaisie
+462;Maldives;MV;MDV;Maldives
+466;Mali;ML;MLI;Mali
+470;Malta;MT;MLT;Malte
+478;Mauritania;MR;MRT;Mauritanie
+480;Mauritius;MU;MUS;Maurice
+484;Mexico;MX;MEX;Mexique
+490;Other Asia, nes;;S19;Autres pays d'Asie, non spécifiés
+496;Mongolia;MN;MNG;Mongolie
+498;Rep. of Moldova;MD;MDA;République de Moldavie
+499;Montenegro;ME;MNE;Monténégro
+500;Montserrat;MS;MSR;Montserrat
+504;Morocco;MA;MAR;Maroc
+508;Mozambique;MZ;MOZ;Mozambique
+512;Oman;OM;OMN;Oman
+516;Namibia;;NAM;Namibie
+520;Nauru;NR;NRU;Nauru
+524;Nepal;NP;NPL;Népal
+528;Netherlands;NL;NLD;Pays-Bas
+530;Netherlands Antilles (...2010);AN;ANT;Antilles néerlandaises (... 2010)
+531;CuraÃ§ao;CW;CUW;Curaçao
+533;Aruba;AW;ABW;Aruba
+534;Saint Maarten;SX;SXM;Saint-Martin (Pays-Bas)
+535;Bonaire;BQ;BES;Bonaire
+540;New Caledonia;NC;NCL;Nouvelle-Calédonie
+548;Vanuatu;VU;VUT;Vanuatu
+554;New Zealand;NZ;NZL;Nouvelle-Zélande
+558;Nicaragua;NI;NIC;Nicaragua
+562;Niger;NE;NER;Niger
+566;Nigeria;NG;NGA;Nigeria
+570;Niue;NU;NIU;Niue
+574;Norfolk Isds;NF;NFK;Île Norfolk
+579;Norway;NO;NOR;Norvège
+580;N. Mariana Isds;MP;MNP;Îles Mariannes du Nord
+583;FS Micronesia;FM;FSM;États fédérés de Micronésie
+584;Marshall Isds;MH;MHL;Îles Marshall
+585;Palau;PW;PLW;Palaos
+586;Pakistan;PK;PAK;Pakistan
+591;Panama;PA;PAN;Panama
+598;Papua New Guinea;PG;PNG;Papouasie-Nouvelle-Guinée
+600;Paraguay;PY;PRY;Paraguay
+604;Peru;PE;PER;Pérou
+608;Philippines;PH;PHL;Philippines
+612;Pitcairn;PN;PCN;Îles Pitcairn
+616;Poland;PL;POL;Pologne
+620;Portugal;PT;PRT;Portugal
+624;Guinea-Bissau;GW;GNB;Guinée-Bissau
+626;Timor-Leste;TL;TLS;Timor oriental
+634;Qatar;QA;QAT;Qatar
+642;Romania;RO;ROU;Roumanie
+643;Russian Federation;RU;RUS;Fédération de Russie
+646;Rwanda;RW;RWA;Rwanda
+652;Saint BarthÃ©lemy;BL;BLM;Saint-Barthélemy
+654;Saint Helena;SH;SHN;Sainte-Hélène
+659;Saint Kitts and Nevis;KN;KNA;Saint-Christophe-et-Niévès
+660;Anguilla;AI;AIA;Anguilla
+662;Saint Lucia;LC;LCA;Sainte-Lucie
+666;Saint Pierre and Miquelon;PM;SPM;Saint-Pierre-et-Miquelon
+670;Saint Vincent and the Grenadines;VC;VCT;Saint-Vincent-et-les-Grenadines
+674;San Marino;SM;SMR;Saint-Marin
+678;Sao Tome and Principe;ST;STP;Sao Tomé-et-Principe
+682;Saudi Arabia;SA;SAU;Arabie saoudite
+686;Senegal;SN;SEN;Sénégal
+688;Serbia;RS;SRB;Serbie
+690;Seychelles;SC;SYC;Seychelles
+694;Sierra Leone;SL;SLE;Sierra Leone
+697;Europe EFTA, nes;;R20;Europe AELE, non spécifiés
+699;India;IN;IND;Inde
+702;Singapore;SG;SGP;Singapour
+703;Slovakia;SK;SVK;Slovaquie
+704;Viet Nam;VN;VNM;Vietnam
+705;Slovenia;SI;SVN;Slovénie
+706;Somalia;SO;SOM;Somalie
+710;South Africa;ZA;ZAF;Afrique du Sud
+711;Southern African Customs Union (...1999);;ZA1;Union douanière d'Afrique australe (... 1999)
+716;Zimbabwe;ZW;ZWE;Zimbabwe
+724;Spain;ES;ESP;Espagne
+728;South Sudan;SS;SSD;Soudan du Sud
+729;Sudan;SD;SDN;Soudan
+736;Sudan (...2011);SD;SDN;Soudan (... 2011)
+740;Suriname;SR;SUR;Suriname
+748;Eswatini;SZ;SWZ;Eswatini
+752;Sweden;SE;SWE;Suède
+757;Switzerland;CH;CHE;Suisse
+760;Syria;SY;SYR;Syrie
+762;Tajikistan;TJ;TJK;Tadjikistan
+764;Thailand;TH;THA;Thaïlande
+768;Togo;TG;TGO;Togo
+772;Tokelau;TK;TKL;Tokelau
+776;Tonga;TO;TON;Tonga
+780;Trinidad and Tobago;TT;TTO;Trinité-et-Tobago
+784;United Arab Emirates;AE;ARE;Émirats arabes unis
+788;Tunisia;TN;TUN;Tunisie
+792;TÃ¼rkiye;TR;TUR;Turquie
+795;Turkmenistan;TM;TKM;Turkménistan
+796;Turks and Caicos Isds;TC;TCA;Îles Turques-et-Caïques
+798;Tuvalu;TV;TUV;Tuvalu
+800;Uganda;UG;UGA;Ouganda
+804;Ukraine;UA;UKR;Ukraine
+807;North Macedonia;MK;MKD;Macédoine du Nord
+810;USSR (...1990);SU;SUN;URSS (... 1990)
+818;Egypt;EG;EGY;Égypte
+826;United Kingdom;GB;GBR;Royaume-Uni
+834;United Rep. of Tanzania;TZ;TZA;République-Unie de Tanzanie
+842;USA;US;USA;États-Unis
+849;US Misc. Pacific Isds;PU;PUS;Îles du Pacifique (États-Unis), diverses
+854;Burkina Faso;BF;BFA;Burkina Faso
+858;Uruguay;UY;URY;Uruguay
+860;Uzbekistan;UZ;UZB;Ouzbékistan
+862;Venezuela;VE;VEN;Venezuela
+876;Wallis and Futuna Isds;WF;WLF;Wallis-et-Futuna
+882;Samoa;WS;WSM;Samoa
+887;Yemen;YE;YEM;Yémen
+891;Serbia and Montenegro (...2005);CS;SCG;Serbie-et-Monténégro (... 2005)
+894;Zambia;ZM;ZMB;Zambie
