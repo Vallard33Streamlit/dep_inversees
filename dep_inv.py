@@ -10,9 +10,9 @@ st.header("Dépendances inversées")
 def load_baci():
     l_bacis = []
     for i in range (5):
-        l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": str}))
+        l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": str}).drop(columns="t"))
     baci = pd.concat(l_bacis)
-
+    del l_bacis
     countries_config = pd.read_csv("country_codes.csv", sep=";")[["country_code", "nom_pays"]]
     countries_config= countries_config[countries_config["country_code"].isin(set(baci["i"].unique()) | set(baci["j"].unique()))]
 
@@ -59,15 +59,19 @@ def calc_c(baci2, type, country=0):
     ).rename(columns={col : f"{col}_{type}_{type2}" for col in ["v", "q", "hhi"]}).reset_index()
 
     temp = baci3.groupby('k').apply(lambda x: x.nlargest(3, 'v')[['v', y]])
+    del baci3
     temp["n"] = temp.groupby(level="k").cumcount() + 1
     temp = temp.reset_index(level="k")
     top3 = temp.pivot(index="k", columns="n")
+    del temp
     top3.columns = [f"{col}{n}" for col, n in top3.columns]
     top3.reset_index(inplace=True)
     top3.rename(columns={col : f"cc_{type_o}_max_{col[-1]}_{type2}_{type}" for col in top3.columns if col[0]==y}, inplace=True)
     top3.rename(columns={col : f"p_{type_o}_max_{col[-1]}_{type2}_{type}" for col in top3.columns if col[0]=="v"}, inplace=True)
 
     df_tot = hhi_c.merge(top3, how="outer")
+    del hhi_c
+    del top3
     df_tot[f"hhi_{type}_{type2}"] /= (df_tot[f"v_{type}_{type2}"]**2)
     for col in df_tot.columns:
         if col[0] == "p":
@@ -113,7 +117,6 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
         if new_zone_name not in c_config["nom_pays"].values:
             c_config.loc[1000+st.session_state.compt_z_infl] = 1000+st.session_state.compt_z_infl, new_zone_name, False, np.nan
             st.session_state.modified_z_infl = True
-            st.toast(f"Zone '{new_zone_name}' ajoutée !")
             st.session_state.compt_z_infl += 1
         else:
             st.error(new_zone_name + " existe déjà.")
@@ -160,13 +163,14 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
     if st.session_state.modified_z_infl:
         if st.button("💾 **Enregistrer la configuration**", type="primary"):
             st.session_state.modified_z_infl = False
-            # st.toast("Configuration enregistrée ! Les filtres seront appliqués après validation.")
             st.session_state.modified_sel_country = True
             if c_config.loc[c_config["country_code"] == 251, "zone"].isna().any():
                 st.session_state.fr_ue = 251
             else :
                 st.session_state.fr_ue = c_config.loc[c_config["country_code"] == 251, "zone"].iloc[0]
+            st.write("baci2 pas calculée")
             st.session_state.baci2 = calc_baci2(c_config)
+            st.write("baci2 calculée")
             st.session_state.df_m = calc_c(st.session_state.baci2, "imp", 0).merge(calc_c(st.session_state.baci2, "exp", 0), how="outer")
             
 
