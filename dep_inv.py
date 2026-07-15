@@ -149,7 +149,7 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
             selected_countries = st.multiselect(
                 "Pays associés",
                 options=sorted(list(c_config.loc[(c_config["country"]&c_config["zone"].isna()) | (c_config["zone"] == zone), "nom_pays"])),
-                default=sorted(list(c_config.loc[c_config["zone"] == zone, "nom_pays"]),)
+                default=sorted(list(c_config.loc[c_config["zone"] == zone, "nom_pays"])),
                 key=f"countries_{zone}",
                 label_visibility="collapsed"
             )
