@@ -66,6 +66,10 @@ def calc_var(type, country=0):
     top3 = temp.pivot(index="k", columns="n")
     top3.columns = [f"{col}{n}" for col, n in top3.columns]
     top3.reset_index(inplace=True)
+    for col in top3.columns:
+        if col[0]==y:
+            top3 = top3.merge(c_config, left_on=col, right_on="country_code", how="left").rename(columns={"nom_pays":f"c_{type_o}_max_{col[-1]}_{type2}_{type}"})
+            top3.drop(columns=[col, "country_code", "country", "zone"], inplace=True)
     top3.rename(columns={col : f"cc_{type_o}_max_{col[-1]}_{type2}_{type}" for col in top3.columns if col[0]==y}, inplace=True)
     top3.rename(columns={col : f"p_{type_o}_max_{col[-1]}_{type2}_{type}" for col in top3.columns if col[0]=="v"}, inplace=True)
 
@@ -93,6 +97,7 @@ if "compt_z_infl" not in st.session_state:
 
 countries_config = load_countries_config()
 labels = load_labels()
+load_baci()
 
 # --- 2. Initialisation de la configuration dans session_state ---
 if "countries_config" not in st.session_state:
@@ -160,7 +165,6 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
     # --- Bouton de validation globale ---
     if st.session_state.modified_z_infl:
         if st.button("💾 **Enregistrer la configuration**", type="primary"):
-            st.session_state.modified_z_infl = False
             st.session_state.modified_sel_country = True
             if c_config.loc[c_config["country_code"] == 251, "zone"].isna().any():
                 st.session_state.fr_ue = 251
@@ -168,6 +172,7 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
                 st.session_state.fr_ue = c_config.loc[c_config["country_code"] == 251, "zone"].iloc[0]
             st.session_state.baci2 = calc_baci2(c_config)
             st.session_state.df_m = calc_var("imp", 0).merge(calc_var("exp", 0), how="outer")
+            st.session_state.modified_z_infl = False
             
 
 if not st.session_state.modified_z_infl:
@@ -182,7 +187,6 @@ if not st.session_state.modified_z_infl:
         if st.session_state.modified_sel_country:
             selected_country_code = c_config.loc[c_config["nom_pays"] == st.session_state.selected_country, "country_code"].iloc[0]
             if st.button("🔍 **Appliquer les filtres**"):
-                st.session_state.modified_sel_country = False
                 st.session_state.df_final = calc_var("imp", selected_country_code).merge(calc_var("exp", selected_country_code), how="outer").merge(st.session_state.df_m, how="outer")
                 for col in st.session_state.df_final.columns:
                     if (col[0] == "v") | (col[0] == "q") | (col[0] == "p"):
@@ -230,6 +234,7 @@ if not st.session_state.modified_z_infl:
                     "Premier exportateur mondial", "Deuxième exportateur mondial", "Troisième exportateur mondial",
                     "Premier importateur mondial", "Deuxième importateur mondial", "Troisième importateur mondial"]
                 st.session_state.df_final = st.session_state.df_final[l_cols]
+                st.session_state.modified_sel_country = False
     # --- 5. Application des filtres (uniquement après validation) ---
     if not st.session_state.modified_sel_country:
         df_final_mod = st.session_state.df_final.copy()
