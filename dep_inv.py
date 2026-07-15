@@ -13,6 +13,10 @@ def load_baci():
         l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": str}).drop(columns="t"))
     baci = pd.concat(l_bacis)
     del l_bacis
+    return baci, countries_config
+
+@st.cache_data
+def load_countries_config():
     countries_config = pd.read_csv("country_codes.csv", sep=";")[["country_code", "nom_pays"]]
     countries_config= countries_config[countries_config["country_code"].isin(set(baci["i"].unique()) | set(baci["j"].unique()))]
 
@@ -21,15 +25,14 @@ def load_baci():
     l_ue = [276, 40, 6, 100, 196, 191, 208, 724, 233, 246, 251, 300, 348, 372, 380, 428, 440, 442, 470, 528, 616, 620, 642, 703, 705, 752, 203]
     countries_config.loc[1000] = 1000, "UE", False, np.nan
     countries_config.loc[countries_config['country_code'].isin(set(l_ue)), "zone"] = 1000
-
-    return baci, countries_config
+    return countries_config
 
 @st.cache_data
 def load_labels():
     return pd.read_csv("labels_hs6.csv", dtype={"Code HS6": str})
 
 def calc_baci2(countries_config):
-    baci2 = baci.merge(countries_config.loc[countries_config["zone"].notna(), ["country_code", "zone"]], left_on="i", right_on="country_code", how="left")
+    baci2 = load_baci().merge(countries_config.loc[countries_config["zone"].notna(), ["country_code", "zone"]], left_on="i", right_on="country_code", how="left")
     baci2.loc[baci2["zone"].notna(), "i"] = baci2.loc[baci2["zone"].notna(), "zone"] 
     baci2.drop(columns=["country_code", "zone"], inplace=True)
     baci2 = baci2.merge(countries_config.loc[countries_config["zone"].notna(), ["country_code", "zone"]], left_on="j", right_on="country_code", how="left")
@@ -93,7 +96,7 @@ def maj(c):
 if "compt_z_infl" not in st.session_state:
     st.session_state.compt_z_infl = 2
 
-baci, countries_config = load_baci()
+countries_config = load_countries_config()
 labels = load_labels()
 
 # --- 2. Initialisation de la configuration dans session_state ---
