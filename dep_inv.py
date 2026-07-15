@@ -40,7 +40,7 @@ def calc_baci2(countries_config):
     baci2 = baci2[baci2["i"] != baci2['j']]
     return baci2.groupby(["i","j","k"])[["v", "q"]].sum().reset_index()
 
-def calc_c(type, country=0):
+def calc_var(type, country=0):
     if type == "imp":
         x, y = "j", "i"
         type_o = "exp"
@@ -167,7 +167,7 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
             else :
                 st.session_state.fr_ue = c_config.loc[c_config["country_code"] == 251, "zone"].iloc[0]
             st.session_state.baci2 = calc_baci2(c_config)
-            st.session_state.df_m = calc_c(st.session_state.baci2, "imp", 0).merge(calc_c(st.session_state.baci2, "exp", 0), how="outer")
+            st.session_state.df_m = calc_var("imp", 0).merge(calc_var("exp", 0), how="outer")
             
 
 if not st.session_state.modified_z_infl:
@@ -183,7 +183,7 @@ if not st.session_state.modified_z_infl:
             selected_country_code = c_config.loc[c_config["nom_pays"] == st.session_state.selected_country, "country_code"].iloc[0]
             if st.button("🔍 **Appliquer les filtres**"):
                 st.session_state.modified_sel_country = False
-                st.session_state.df_final = calc_c(st.session_state.baci2, "imp", selected_country_code).merge(calc_c(st.session_state.baci2, "exp", selected_country_code), how="outer").merge(st.session_state.df_m, how="outer")
+                st.session_state.df_final = calc_var("imp", selected_country_code).merge(calc_var("exp", selected_country_code), how="outer").merge(st.session_state.df_m, how="outer")
                 for col in st.session_state.df_final.columns:
                     if (col[0] == "v") | (col[0] == "q") | (col[0] == "p"):
                         st.session_state.df_final[col] = st.session_state.df_final[col].fillna(0)
