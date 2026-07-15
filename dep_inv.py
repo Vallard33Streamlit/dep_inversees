@@ -40,7 +40,7 @@ def calc_baci2(countries_config):
     baci2 = baci2[baci2["i"] != baci2['j']]
     return baci2.groupby(["i","j","k"])[["v", "q"]].sum().reset_index()
 
-def calc_c(baci2, type, country=0):
+def calc_c(type, country=0):
     if type == "imp":
         x, y = "j", "i"
         type_o = "exp"
@@ -49,10 +49,10 @@ def calc_c(baci2, type, country=0):
         type_o = "imp"
     if country == 0:
         type2="m"
-        baci3 = baci2.groupby(["k", y])[["v", "q"]].sum().reset_index()
+        baci3 = st.session_state.baci2.groupby(["k", y])[["v", "q"]].sum().reset_index()
     else:
         type2 = "c"
-        baci3 = baci2[baci2[x] == country].copy()
+        baci3 = st.session_state.baci2[st.session_state.baci2[x] == country].copy()
 
     hhi_c =baci3.groupby("k").agg(
             v=("v", "sum"),
@@ -61,19 +61,15 @@ def calc_c(baci2, type, country=0):
     ).rename(columns={col : f"{col}_{type}_{type2}" for col in ["v", "q", "hhi"]}).reset_index()
 
     temp = baci3.groupby('k').apply(lambda x: x.nlargest(3, 'v')[['v', y]])
-    del baci3
     temp["n"] = temp.groupby(level="k").cumcount() + 1
     temp = temp.reset_index(level="k")
     top3 = temp.pivot(index="k", columns="n")
-    del temp
     top3.columns = [f"{col}{n}" for col, n in top3.columns]
     top3.reset_index(inplace=True)
     top3.rename(columns={col : f"cc_{type_o}_max_{col[-1]}_{type2}_{type}" for col in top3.columns if col[0]==y}, inplace=True)
     top3.rename(columns={col : f"p_{type_o}_max_{col[-1]}_{type2}_{type}" for col in top3.columns if col[0]=="v"}, inplace=True)
 
     df_tot = hhi_c.merge(top3, how="outer")
-    del hhi_c
-    del top3
     df_tot[f"hhi_{type}_{type2}"] /= (df_tot[f"v_{type}_{type2}"]**2)
     for col in df_tot.columns:
         if col[0] == "p":
@@ -83,7 +79,7 @@ def calc_c(baci2, type, country=0):
     df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"] = df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"].fillna(0) / df_tot[f"v_{type}_{type2}"]
     
     if country != 0:
-        baci4 = baci2[baci2[y] == st.session_state.fr_ue]
+        baci4 = st.session_state.baci2[st.session_state.baci2[y] == st.session_state.fr_ue]
         temp = baci4[baci4[x] == country].merge(baci4.groupby("k")["v"].sum().rename("v_sum").reset_index(), how="outer")
         temp[f"p_{type}_{type2}_{type_o}_fr_ue"] = temp["v"].fillna(0) / temp["v_sum"]
         df_tot = df_tot.merge(temp[["k", f"p_{type}_{type2}_{type_o}_fr_ue"]], how="outer")
@@ -170,9 +166,7 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
                 st.session_state.fr_ue = 251
             else :
                 st.session_state.fr_ue = c_config.loc[c_config["country_code"] == 251, "zone"].iloc[0]
-            st.write("baci2 pas calculée")
             st.session_state.baci2 = calc_baci2(c_config)
-            st.write("baci2 calculée")
             st.session_state.df_m = calc_c(st.session_state.baci2, "imp", 0).merge(calc_c(st.session_state.baci2, "exp", 0), how="outer")
             
 
