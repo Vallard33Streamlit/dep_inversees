@@ -13,12 +13,11 @@ def load_baci():
         l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": str}).drop(columns="t"))
     baci = pd.concat(l_bacis)
     del l_bacis
-    return baci, countries_config
+    return baci
 
 @st.cache_data
 def load_countries_config():
     countries_config = pd.read_csv("country_codes.csv", sep=";")[["country_code", "nom_pays"]]
-    countries_config= countries_config[countries_config["country_code"].isin(set(baci["i"].unique()) | set(baci["j"].unique()))]
 
     countries_config["country"] = True
     countries_config["zone"] = np.nan
