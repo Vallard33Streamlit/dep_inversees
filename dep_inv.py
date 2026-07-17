@@ -36,12 +36,15 @@ st.header("Dépendances inversées")
 def load_baci():
     l_bacis = []
     for i in range (5):
-        l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": str, "i": "int16", "j": "int16", "v": "float64", "q": "float64"}, usecols=["i", "j", "k", "v", "q"]))
-    baci = pd.concat(l_bacis)
-    del l_bacis
-    return baci
+        l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": "int32", "i": "int16", "j": "int16", "v": "float64", "q": "float64"}, usecols=["i", "j", "k", "v", "q"]))
+    return pd.concat(l_bacis, ignore_index=True)
 
-
+def conv_str(x):
+    s = str(x)
+    if len(s) == 5:
+        return "0" + s
+    else :
+        return s
 
 @st.cache_data
 def load_countries_config():
@@ -104,7 +107,10 @@ def calc_var(type, country=0):
             hhi=("v", lambda x: (x ** 2).sum())
     ).rename(columns={col : f"{col}_{type}_{type2}" for col in ["v", "q", "hhi"]}).reset_index()
     
-    temp = baci3[["k", y, "v"]].sort_values("v", ascending=False).groupby("k").head(3)[['v', y]]
+    temp_fr_ue = baci3.loc[baci3[y] == st.session_state.fr_ue, ["k", "v"]].groupby("k").sum().reset_index().rename(columns={"v":f"p_{type_o}_fr_ue_{type}_{type2}"})
+
+    temp = baci3[["k", y, "v"]].sort_values("v", ascending=False).groupby("k").head(3).set_index("k")
+    del baci3
     temp["n"] = temp.groupby(level="k").cumcount() + 1
     temp = temp.reset_index(level="k")
     top3 = temp.pivot(index="k", columns="n")
@@ -118,12 +124,13 @@ def calc_var(type, country=0):
     top3.rename(columns={col : f"p_{type_o}_max_{col[-1]}_{type2}_{type}" for col in top3.columns if col[0]=="v"}, inplace=True)
 
     df_tot = hhi_c.merge(top3, how="outer")
+    del hhi_c, top3
     df_tot[f"hhi_{type}_{type2}"] /= (df_tot[f"v_{type}_{type2}"]**2)
     for col in df_tot.columns:
         if col[0] == "p":
             df_tot[col] = df_tot[col].fillna(0) / df_tot[f"v_{type}_{type2}"] * 100
 
-    df_tot = df_tot.merge(baci3.loc[baci3[y] == st.session_state.fr_ue, ["k", "v"]].groupby("k").sum().reset_index().rename(columns={"v":f"p_{type_o}_fr_ue_{type}_{type2}"}), how="outer")
+    df_tot = df_tot.merge(temp_fr_ue, how="outer")
     df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"] = df_tot[f"p_{type_o}_fr_ue_{type}_{type2}"].fillna(0) / df_tot[f"v_{type}_{type2}"] * 100
     
     if country != 0:
@@ -237,6 +244,7 @@ if not st.session_state.modified_z_infl:
                 else:
                     st.session_state.fr_ue_lab = "l'UE"
                 st.session_state.df_final.rename(columns={"k":"Code HS6"}, inplace=True)
+                st.session_state.df_final["Code HS6"] = st.session_state.df_final["Code HS6"].apply(conv_str)
                 st.session_state.df_final = st.session_state.df_final.merge(labels, how="left")
                 st.session_state.df_final["Code HS4"] = st.session_state.df_final["Code HS6"].apply(lambda x : x[:4])
                 st.session_state.df_final = st.session_state.df_final.merge(labels.rename(columns={"Code HS6":"Code HS4", "Label HS6":"Label HS4"}), how="left")
@@ -276,6 +284,7 @@ if not st.session_state.modified_z_infl:
                     "Premier importateur mondial", "Deuxième importateur mondial", "Troisième importateur mondial"]
                 st.session_state.df_final = st.session_state.df_final[l_cols]
                 st.session_state.modified_sel_country = False
+
 
     if not st.session_state.modified_sel_country:
         df_final_mod = st.session_state.df_final.copy()
@@ -353,7 +362,8 @@ if not st.session_state.modified_z_infl:
         st.dataframe(df_final_mod)
 
         st.write("**Exportations :**")
-        nom_fichier = st.text_input("Nom du fichier à télécharger (sans extension) :", value=f"dependances_inversees_{"_".join(selected_country.split(" "))}{type_produit}", key=f"nom_fichier_{selected_country}{type_produit}")
+        # nom_fichier = st.text_input("Nom du fichier à télécharger (sans extension) :", value=f"dependances_inversees_{"_".join(selected_country.split(" "))}{type_produit}", key=f"nom_fichier_{selected_country}{type_produit}")
+        nom_fichier = st.text_input("Nom du fichier à télécharger (sans extension) :", value=f"dependances_inversees_{selected_country.replace(' ', '_')}{type_produit}", key=f"nom_fichier_{selected_country}{type_produit}")
         st.download_button(
             label="📥 Télécharger le tableau filtré en csv (sans les métadonnées et informations sur les filtres)",
             data=df_final_mod.to_csv(index=False, sep=";").encode("utf-8"),
@@ -482,3 +492,15 @@ if not st.session_state.modified_z_infl:
 # Affiche la mémoire dans la sidebar
 st.sidebar.markdown("### 📊 Mémoire utilisée")
 st.sidebar.write(f"**{get_memory_usage():.1f} Mo** / ~1.5 Go (limite Streamlit Cloud)")
+def memory_df(df, name="df"):
+    size = df.memory_usage(deep=True).sum() / 1024**2
+    st.sidebar.write(f"{name}: {size:.2f} Mo")
+memory_df(st.session_state.baci2, "baci2")
+memory_df(st.session_state.df_final, "df_final")
+memory_df(st.session_state.df_m, "df_m")
+import gc
+st.sidebar.write("avant", get_memory_usage())
+
+gc.collect()
+
+st.sidebar.write("après", get_memory_usage())
