@@ -1,5 +1,20 @@
 import streamlit as st
-import openpyxl
+import sys
+
+print(sys.version)
+
+try:
+    import openpyxl
+    print("openpyxl OK")
+except Exception as e:
+    print(e)
+
+try:
+    import streamlit_antd_components
+    print("antd OK")
+except Exception as e:
+    print(e)
+    
 import streamlit_antd_components as sac
 import pandas as pd
 import numpy as np
