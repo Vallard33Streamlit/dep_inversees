@@ -8,12 +8,12 @@ from io import BytesIO
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles import Alignment
 
-import psutil
-import os
+# import psutil
+# import os
 
-def get_memory_usage():
-    process = psutil.Process(os.getpid())
-    return process.memory_info().rss / (1024 ** 2)  # en Mo
+# def get_memory_usage():
+#     process = psutil.Process(os.getpid())
+#     return process.memory_info().rss / (1024 ** 2)  # en Mo
 
 version_baci = "2026"
 annee_baci = "2024"
@@ -489,18 +489,18 @@ if not st.session_state.modified_z_infl:
             )
 
 
-# Affiche la mémoire dans la sidebar
-st.sidebar.markdown("### 📊 Mémoire utilisée")
-st.sidebar.write(f"**{get_memory_usage():.1f} Mo** / ~1.5 Go (limite Streamlit Cloud)")
-def memory_df(df, name="df"):
-    size = df.memory_usage(deep=True).sum() / 1024**2
-    st.sidebar.write(f"{name}: {size:.2f} Mo")
-memory_df(st.session_state.baci2, "baci2")
-memory_df(st.session_state.df_final, "df_final")
-memory_df(st.session_state.df_m, "df_m")
-import gc
-st.sidebar.write("avant", get_memory_usage())
+# # Affiche la mémoire dans la sidebar
+# st.sidebar.markdown("### 📊 Mémoire utilisée")
+# st.sidebar.write(f"**{get_memory_usage():.1f} Mo** / ~1.5 Go (limite Streamlit Cloud)")
+# def memory_df(df, name="df"):
+#     size = df.memory_usage(deep=True).sum() / 1024**2
+#     st.sidebar.write(f"{name}: {size:.2f} Mo")
+# memory_df(st.session_state.baci2, "baci2")
+# memory_df(st.session_state.df_final, "df_final")
+# memory_df(st.session_state.df_m, "df_m")
+# import gc
+# st.sidebar.write("avant", get_memory_usage())
 
-gc.collect()
+# gc.collect()
 
-st.sidebar.write("après", get_memory_usage())
+# st.sidebar.write("après", get_memory_usage())
