@@ -36,10 +36,12 @@ st.header("Dépendances inversées")
 def load_baci():
     l_bacis = []
     for i in range (5):
-        l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": str}).drop(columns="t"))
+        l_bacis.append(pd.read_csv(f"baci{i+1}.csv", dtype={"k": str, "i": "int16", "j": "int16", "v": "float64", "q": "float64"}, usecols=["i", "j", "k", "v", "q"]))
     baci = pd.concat(l_bacis)
     del l_bacis
     return baci
+
+
 
 @st.cache_data
 def load_countries_config():
@@ -101,8 +103,8 @@ def calc_var(type, country=0):
             q=("q", "sum"),
             hhi=("v", lambda x: (x ** 2).sum())
     ).rename(columns={col : f"{col}_{type}_{type2}" for col in ["v", "q", "hhi"]}).reset_index()
-
-    temp = baci3.groupby('k').apply(lambda x: x.nlargest(3, 'v')[['v', y]])
+    
+    temp = baci3[["k", y, "v"]].sort_values("v", ascending=False).groupby("k").head(3)
     temp["n"] = temp.groupby(level="k").cumcount() + 1
     temp = temp.reset_index(level="k")
     top3 = temp.pivot(index="k", columns="n")
@@ -365,12 +367,6 @@ if not st.session_state.modified_z_infl:
             for zone in c_config["zone"].unique():
                 if not np.isnan(zone):
                     zones_influence[c_config.loc[c_config["country_code"] == zone, "nom_pays"].values[0]] = sorted(list(c_config.loc[c_config["zone"] == zone, "nom_pays"]))
-            lab_filtres = {"type_filter" : "Produits",
-                           "hhi_c" : f"HHi des {type}ortations supérieur à",
-                           "hhi_M" : f"HHi mondial des {type2}ortations supérieur à",
-                           "p_fr_ue_in_c" : f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à",
-                           "p_c_in_fr_ue" : f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à",
-                           "v" : f"Montant des {type}ortations du pays supérieur à"}
             
             buffer = BytesIO()
             with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
@@ -416,6 +412,13 @@ if not st.session_state.modified_z_infl:
 
                     row += 1
                 if filtres:
+                    lab_filtres = {"type_filter" : "Produits",
+                           "hhi_c" : f"HHi des {type}ortations supérieur à",
+                           "hhi_M" : f"HHi mondial des {type2}ortations supérieur à",
+                           "p_fr_ue_in_c" : f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à",
+                           "p_c_in_fr_ue" : f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à",
+                           "v" : f"Montant des {type}ortations du pays supérieur à"}
+            
                     ws[f"A{row}"] = "Filtres appliqués"
                     ws[f"A{row}"].font = bold
                     ws[f"B{row}"] = "Valeur"
