@@ -15,10 +15,6 @@ def get_memory_usage():
     process = psutil.Process(os.getpid())
     return process.memory_info().rss / (1024 ** 2)  # en Mo
 
-# Affiche la mémoire dans la sidebar
-st.sidebar.markdown("### 📊 Mémoire utilisée")
-st.sidebar.write(f"**{get_memory_usage():.1f} Mo** / ~1.5 Go (limite Streamlit Cloud)")
-
 version_baci = "2026"
 annee_baci = "2024"
 version_hs6 = "2022"
@@ -479,3 +475,7 @@ if not st.session_state.modified_z_infl:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
+
+# Affiche la mémoire dans la sidebar
+st.sidebar.markdown("### 📊 Mémoire utilisée")
+st.sidebar.write(f"**{get_memory_usage():.1f} Mo** / ~1.5 Go (limite Streamlit Cloud)")
