@@ -1,5 +1,5 @@
 import streamlit as st
-import streamlit_antd_components
+import streamlit_antd_components as sac
 import pandas as pd
 import numpy as np
 from copy import deepcopy
