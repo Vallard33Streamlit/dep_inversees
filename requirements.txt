@@ -3,3 +3,4 @@ streamlit-antd-components
 pandas
 numpy
 openpyxl
+psutil
