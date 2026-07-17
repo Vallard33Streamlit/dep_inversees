@@ -2,15 +2,29 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from copy import deepcopy
+from io import BytesIO
+import streamlit_antd_components as sac
+from openpyxl.styles import Font, PatternFill
+from openpyxl.styles import Alignment
 
-vesrion_baci = "2026"
+version_baci = "2026"
 annee_baci = "2024"
 version_hs6 = "2022"
-
+def get_explication_filtre(filtre, type, type2):
+    if filtre == "hhi_c" :
+        return f"L'indice HHI des {type}ortations mesure la concentration des {type}ortations d'un pays entre ses partenaires. Un indice élevé indique une forte dépendance à un petit nombre de pays {type2}ortateurs, tandis qu'un indice faible traduit une plus grande diversification."
+    elif filtre == "hhi_M" :
+        return f"L'indice HHI des {type2}ortations mesure la concentration des {type2}ortations dans le monde. Un indice élevé indique une forte dépendance mondiale à un petit nombre de pays {type2}ortateurs, tandis qu'un indice faible traduit une plus grande diversification."
+    elif filtre == "p_fr_ue_in_c" :
+        return f"La part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays mesure l'impact direct qu'une restriction de {st.session_state.fr_ue_lab} sur ses {type2}ortations aura sur les {type}ortations du pays étudié."
+    elif filtre == "p_c_in_fr_ue" :
+        return f"La part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} mesure l'impact direct qu'une restriction de {st.session_state.fr_ue_lab} sur ses {type2}ortations envers le pays étudié aura sur ses propres {type2}ortations."
+    else :
+        return ""
+    
 st.set_page_config(layout="wide")
 # --- 1. Initialisation des données (cachée) ---
 st.header("Dépendances inversées")
-@st.cache_data
 def load_baci():
     l_bacis = []
     for i in range (5):
@@ -32,7 +46,23 @@ def load_countries_config():
 
 @st.cache_data
 def load_labels():
-    return pd.read_csv("labels_hs6.csv", dtype={"Code HS6": str})
+    labels_sections = pd.read_csv("labels_sections.csv")
+    labels_sections["l_hs2"] = labels_sections["l_hs2"].fillna("").apply(lambda x : x.split(","))
+    labels_sections.loc[labels_sections["Niveau"] == "HS2", "l_hs2"] = np.nan
+    labels_sections_tree = []
+    for s in labels_sections[labels_sections["Niveau"] == "Section"].iterrows():
+        dic={}
+        dic["label"] = "Section " + s[1].Catégorie + " - " + s[1].Label
+        dic["value"] = s[1].Catégorie
+        children = []
+        for c in labels_sections[labels_sections["Catégorie"].apply(lambda x : x in s[1].l_hs2)].iterrows():
+            dic_c = {}
+            dic_c["label"] = c[1].Catégorie + " - " + c[1].Label
+            dic_c["value"] = c[1].Catégorie
+            children.append(dic_c)
+        dic["children"] = children
+        labels_sections_tree.append(dic)
+    return pd.read_csv("labels_hs6.csv", dtype={"Code HS6": str}), labels_sections, labels_sections_tree, list(labels_sections.loc[(labels_sections["Niveau"] == "HS2")&(labels_sections["Catégorie"] >= "25"), "Catégorie"].index)
 
 def calc_baci2(countries_config):
     baci2 = load_baci().merge(countries_config.loc[countries_config["zone"].notna(), ["country_code", "zone"]], left_on="i", right_on="country_code", how="left")
@@ -100,10 +130,8 @@ if "compt_z_infl" not in st.session_state:
     st.session_state.compt_z_infl = 2
 
 countries_config = load_countries_config()
-labels = load_labels()
-load_baci()
+labels, labels_sections, labels_sections_tree, checked_sections = load_labels()
 
-# --- 2. Initialisation de la configuration dans session_state ---
 if "countries_config" not in st.session_state:
     st.session_state.countries_config = deepcopy(countries_config)
 c_config = st.session_state.countries_config
@@ -113,7 +141,6 @@ if "modified_sel_country" not in st.session_state:
     st.session_state.modified_sel_country = True
 
 
-# --- 3. Éditeur de zones (onglet dédié) ---
 with st.expander("**Éditer les zones d'influence**", expanded=True):
     st.markdown("Modifier les zones et leurs pays, puis valider avec le bouton en bas.")
     # --- Ajout d'une nouvelle zone ---
@@ -189,7 +216,7 @@ if not st.session_state.modified_z_infl:
             on_change=lambda: st.session_state.update(modified_sel_country=True)
         )
         if st.session_state.modified_sel_country:
-            selected_country_code = c_config.loc[c_config["nom_pays"] == st.session_state.selected_country, "country_code"].iloc[0]
+            selected_country_code = c_config.loc[c_config["nom_pays"] == selected_country, "country_code"].iloc[0]
             if st.button("🔍 **Appliquer les filtres**"):
                 st.session_state.df_final = calc_var("imp", selected_country_code).merge(calc_var("exp", selected_country_code), how="outer").merge(st.session_state.df_m, how="outer")
                 for col in st.session_state.df_final.columns:
@@ -239,21 +266,33 @@ if not st.session_state.modified_z_infl:
                     "Premier importateur mondial", "Deuxième importateur mondial", "Troisième importateur mondial"]
                 st.session_state.df_final = st.session_state.df_final[l_cols]
                 st.session_state.modified_sel_country = False
-    # --- 5. Application des filtres (uniquement après validation) ---
+
     if not st.session_state.modified_sel_country:
         df_final_mod = st.session_state.df_final.copy()
         st.subheader("Filtres")
 
+        with st.expander("Sélectionner les sections ou catégories HS2 à afficher", expanded=True, key="container_labels_sections_tree"):
+            selected_categories_index = sac.tree(labels_sections_tree, index = checked_sections, open_index=[], checkbox=True, return_index = True, key="labels_sections_tree", height=500)
+            selected_categories = labels_sections.loc[selected_categories_index, "Catégorie"].values
+            df_final_mod = df_final_mod[df_final_mod["Code HS6"].apply(lambda x : x[:2] in selected_categories)]
+
         type_filter = st.radio(
             "S'intéresser aux produits :",
-            options=["Tous", "Nettement importés", "Nettement exportés"],
+            options=["Tous", "Tels que le pays est importateur net", "Tels que le pays est exportateur net"],
             index=0
         )
-        if type_filter == "Nettement importés":
+        if type_filter == "Tels que le pays est importateur net":
             type, type2 = "imp", "exp"
-        elif type_filter == "Nettement exportés":
+            type_produit = "_importations"
+        elif type_filter == "Tels que le pays est exportateur net":
             type, type2 = "exp", "imp"
+            type_produit = "_exportations"
+        else :
+            type_produit = ""
+
+        filtres= {}
         if type_filter != "Tous":
+            filtres["type_filter"] = type_filter
             l_cols_2 = ["Code HS6", "Label HS6",
                 f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)", f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)", f"HHi des {type}ortations du pays",
                 f"HHi des {type2}ortations mondiales", f"{maj(type)}ortations du pays", f"Quantités {type}ortées du pays", f"{maj(type2)}ortations du pays", f"Quantités {type2}ortées du pays",
@@ -268,42 +307,163 @@ if not st.session_state.modified_z_infl:
             df_final_mod = df_final_mod[(df_final_mod[f"{maj(type)}ortations du pays"] >= df_final_mod[f"{maj(type2)}ortations du pays"])&(df_final_mod[f"{maj(type)}ortations du pays"] > 0)]
             df_final_mod = df_final_mod[l_cols_2]
         
-            filter_by_hhi_c = st.checkbox(f"Filtrer les produits selon l'indice HHi des {type}ortations du pays", key="filter_by_hhi_c", help=f"Est-ce que les {type}ortations du pays sont concentrées ?")
+            filter_by_hhi_c = st.checkbox(f"Filtrer les produits selon l'indice HHi des {type}ortations du pays", key="filter_by_hhi_c", help=get_explication_filtre("hhi_c", type, type2))
             if filter_by_hhi_c:
                 hhi_c = st.slider(f"HHi des {type}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
                 df_final_mod = df_final_mod[df_final_mod[f"HHi des {type}ortations du pays"] >= hhi_c]
+                filtres["hhi_c"] = hhi_c
 
-            filter_by_hhi_m = st.checkbox(f"Filtrer les produits selon l'indice HHi mondial des {type2}ortations", key="filter_by_hhi_m", help=f"Est-ce que le marché des {type2}ortateurs est concentré ?")
+            filter_by_hhi_m = st.checkbox(f"Filtrer les produits selon l'indice HHi mondial des {type2}ortations", key="filter_by_hhi_m", help=get_explication_filtre("hhi_M", type, type2))
             if filter_by_hhi_m:
                 hhi_M = st.slider(f"HHi mondial des {type2}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
                 df_final_mod = df_final_mod[df_final_mod[f"HHi des {type2}ortations mondiales"] >= hhi_M]
+                filtres["hhi_M"] = hhi_M
 
-            filter_by_p_fr_ue_in_c = st.checkbox(f"Filtrer les produits selon la part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays", key="filter_by_p_fr_ue_in_c", help="À quel point on peut faire mal ?")
+            filter_by_p_fr_ue_in_c = st.checkbox(f"Filtrer les produits selon la part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays", key="filter_by_p_fr_ue_in_c", help=get_explication_filtre("p_fr_ue_in_c", type, type2))
             if filter_by_p_fr_ue_in_c:
                 p_fr_ue_in_c = st.slider(f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à :", min_value=0, max_value=100, value=10, step=1, format="%d %%")
                 df_final_mod = df_final_mod[df_final_mod[f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)"] >= p_fr_ue_in_c]
+                filtres["p_fr_ue_in_c"] = f"{p_fr_ue_in_c}%"
 
-            filter_by_p_c_in_fr_ue = st.checkbox(f"Filtrer les produits selon la part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}", key="filter_by_p_c_in_fr_ue", help="À quel point on se fait mal ?")
+            filter_by_p_c_in_fr_ue = st.checkbox(f"Filtrer les produits selon la part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}", key="filter_by_p_c_in_fr_ue", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
             if filter_by_p_c_in_fr_ue:
                 p_c_in_fr_ue = st.slider(f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
                 df_final_mod = df_final_mod[df_final_mod[f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)"] <= p_c_in_fr_ue]
-
+                filtres["p_c_in_fr_ue"] = f"{p_c_in_fr_ue}%"
+                            
             log_values = np.linspace(-3, 6, 901)
-            filter_by_v = st.checkbox(f"Filtrer les produits selon le montant des {type}ortations du pays ", key="filter_by_v")
+            filter_by_v = st.checkbox(f"Filtrer les produits selon le montant des {type}ortations du pays :", key="filter_by_v")
             if filter_by_v:
                 log_value_v = st.select_slider(f"Montant des {type}ortations (en 1000$) supérieur à :", options=log_values, value=0, format_func=lambda x: f"{10**x:.3f}")
                 df_final_mod = df_final_mod[df_final_mod[f"{maj(type)}ortations du pays"] >= 10**log_value_v]
-
-
+                filtres["v"] = f"{10**log_value_v * 1000}$"
+            
         st.subheader("Résultats")
         st.write(f"Il y a {len(df_final_mod)} produits (HS6)")
         st.dataframe(df_final_mod)
 
-        # Export CSV
+        st.write("**Exportations :**")
+        nom_fichier = st.text_input("Nom du fichier à télécharger (sans extension) :", value=f"dependances_inversees_{"_".join(selected_country.split(" "))}{type_produit}", key=f"nom_fichier_{selected_country}{type_produit}")
         st.download_button(
-            "📥 Télécharger les données filtrées",
-            df_final_mod.to_csv(index=False).encode("utf-8"),
-            "data_filtrees.csv",
-            "text/csv"
+            label="📥 Télécharger le tableau filtré en csv (sans les métadonnées et informations sur les filtres)",
+            data=df_final_mod.to_csv(index=False, sep=";").encode("utf-8"),
+            file_name=f"{nom_fichier}.csv",
+            mime="text/csv"
         )
+
+        if st.button("🔧 Préparer le téléchargement en excel"):
+
+            zones_influence = {}
+            for zone in c_config["zone"].unique():
+                if not np.isnan(zone):
+                    zones_influence[c_config.loc[c_config["country_code"] == zone, "nom_pays"].values[0]] = sorted(list(c_config.loc[c_config["zone"] == zone, "nom_pays"]))
+            lab_filtres = {"type_filter" : "Produits",
+                           "hhi_c" : f"HHi des {type}ortations supérieur à",
+                           "hhi_M" : f"HHi mondial des {type2}ortations supérieur à",
+                           "p_fr_ue_in_c" : f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à",
+                           "p_c_in_fr_ue" : f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à",
+                           "v" : f"Montant des {type}ortations du pays supérieur à"}
+            
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+
+                ws = writer.book.create_sheet("Informations")
+
+                titre_font = Font(size=16, bold=True)
+                bold = Font(bold=True)
+
+                ws.merge_cells("A1:C1")
+                ws["A1"] = "Analyse des dépendances inversées"
+                ws["A1"].font = titre_font
+                ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+
+                row = 3
+
+                infos = [
+                    ("Nombre de produits (HS6)", len(df_final_mod)),
+                    ("Source", "Données BACI V" + version_baci),
+                    ("Année", annee_baci),
+                    ("Version HS6", version_hs6),
+                    ("Pays étudié", selected_country),
+                ]
+
+                for cle, valeur in infos:
+                    ws[f"A{row}"] = cle
+                    ws[f"A{row}"].font = bold
+                    ws[f"B{row}"] = valeur
+                    row += 1
+
+                row += 1
+                if zones_influence:
+                    ws[f"A{row}"] = "Zones d'influence"
+                    ws[f"A{row}"].font = bold
+                    ws[f"B{row}"] = "Pays"
+                    ws[f"B{row}"].font = bold
+                    row += 1
+
+                    for zone, pays in zones_influence.items():
+                        ws[f"A{row}"] = zone
+                        ws[f"B{row}"] = ", ".join(pays)
+                        row += 1
+
+                    row += 1
+                if filtres:
+                    ws[f"A{row}"] = "Filtres appliqués"
+                    ws[f"A{row}"].font = bold
+                    ws[f"B{row}"] = "Valeur"
+                    ws[f"B{row}"].font = bold
+                    row_filtre = row
+                    row += 1
+
+                    for filtre, seuil in filtres.items():
+                        ws[f"A{row}"] = lab_filtres.get(filtre, "")
+                        ws[f"B{row}"] = seuil
+                        ws[f"C{row}"] = get_explication_filtre(filtre, type, type2)
+                        if len(get_explication_filtre(filtre, type, type2)) > 0:
+                            ws[f"C{row_filtre}"] = "Explications"
+                            ws[f"C{row_filtre}"].font = bold
+                        row += 1
+                    row += 1
+                
+                vert = PatternFill(fill_type="solid", fgColor="C6EFCE")
+                orange = PatternFill(fill_type="solid", fgColor="FFF2CC")
+                rouge = PatternFill(fill_type="solid", fgColor="F4CCCC")
+
+                ws[f"A{row}"] = "Sections douanières"
+                ws[f"A{row}"].font = bold
+                ws[f"B{row}"] = "Nombre de catégories HS2 sélectionnées"
+                ws[f"B{row}"].font = bold
+                ws[f"C{row}"] = "Catégories HS2 sélectionnées"
+                ws[f"C{row}"].font = bold
+                row += 1
+                set_selected = set(selected_categories)
+                for section in labels_sections[labels_sections["Niveau"] == "Section"].iterrows():
+                    ws[f"A{row}"] = "Section " + section[1].Catégorie + " - " + section[1].Label 
+                    l_hs2 = section[1].l_hs2
+                    ws[f"B{row}"] = f"{len(set_selected&set(l_hs2))} / {len(l_hs2)}"
+                    ws[f"C{row}"] = ", ".join(sorted(list(set_selected&set(l_hs2))))
+                    if len(set_selected&set(l_hs2)) == len(l_hs2):
+                        couleur = vert
+                    elif len(set_selected&set(l_hs2)) > 0 :
+                        couleur = orange
+                    else :
+                        couleur = rouge
+       
+                    ws[f"A{row}"].fill = couleur
+                    ws[f"B{row}"].fill = couleur
+                    ws[f"C{row}"].fill = couleur
+                    row += 1
+
+                ws.column_dimensions["A"].width = 50
+                ws.column_dimensions["B"].width = 50
+                ws.column_dimensions["C"].width = 50
+                df_final_mod.to_excel(writer, sheet_name="Résultats", index=False)
+            buffer.seek(0)
+
+            st.download_button(
+                label="📥 Télécharger le tableau filtré",
+                data=buffer,
+                file_name=f"{nom_fichier}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 

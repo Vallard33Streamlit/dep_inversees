@@ -1,3 +1,5 @@
 streamlit
 pandas
 numpy
+openpyxl
+streamlit_antd_components
