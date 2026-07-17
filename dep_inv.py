@@ -104,7 +104,7 @@ def calc_var(type, country=0):
             hhi=("v", lambda x: (x ** 2).sum())
     ).rename(columns={col : f"{col}_{type}_{type2}" for col in ["v", "q", "hhi"]}).reset_index()
     
-    temp = baci3[["k", y, "v"]].sort_values("v", ascending=False).groupby("k").head(3)
+    temp = baci3[["k", y, "v"]].sort_values("v", ascending=False).groupby("k").head(3)[['v', y]]
     temp["n"] = temp.groupby(level="k").cumcount() + 1
     temp = temp.reset_index(level="k")
     top3 = temp.pivot(index="k", columns="n")
