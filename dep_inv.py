@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from copy import deepcopy
 from io import BytesIO
-import streamlit_antd_components as sac
+import streamlit-antd-components as sac
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles import Alignment
 
