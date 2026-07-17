@@ -8,6 +8,17 @@ from io import BytesIO
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles import Alignment
 
+import psutil
+import os
+
+def get_memory_usage():
+    process = psutil.Process(os.getpid())
+    return process.memory_info().rss / (1024 ** 2)  # en Mo
+
+# Affiche la mémoire dans la sidebar
+st.sidebar.markdown("### 📊 Mémoire utilisée")
+st.sidebar.write(f"**{get_memory_usage():.1f} Mo** / ~1.5 Go (limite Streamlit Cloud)")
+
 version_baci = "2026"
 annee_baci = "2024"
 version_hs6 = "2022"
