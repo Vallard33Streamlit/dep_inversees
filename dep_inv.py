@@ -163,7 +163,6 @@ if "modified_sel_country" not in st.session_state:
 
 
 with st.expander("**Éditer les zones d'influence**", expanded=True):
-    st.markdown("Modifier les zones et leurs pays, puis valider avec le bouton en bas.")
     # --- Ajout d'une nouvelle zone ---
     new_zone_name = st.text_input("Nom de la nouvelle zone", value ="Zone d'influence", key=f"new_zone_input")
     if st.button("➕ Ajouter une zone", key="add_zone_btn") and new_zone_name:
