@@ -226,6 +226,7 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
             st.session_state.df_m.loc[st.session_state.df_m["From HS 2002"].isna(), "From HS 2002"] = 271000
             st.session_state.df_m = st.session_state.df_m.merge(aipnet, how="left", left_on="From HS 2002", right_on="hs_code_6d").drop(columns=["From HS 2022", "From HS 2002", "hs_code_6d"])
             st.session_state.modified_z_infl = False
+            st.rerun()
             
 
 if not st.session_state.modified_z_infl:
@@ -290,6 +291,7 @@ if not st.session_state.modified_z_infl:
                     "Premier importateur mondial", "Deuxième importateur mondial", "Troisième importateur mondial"]
                 st.session_state.df_final = st.session_state.df_final[l_cols]
                 st.session_state.modified_sel_country = False
+                st.rerun()
 
 
     if not st.session_state.modified_sel_country:
