@@ -362,7 +362,7 @@ if not st.session_state.modified_z_infl:
                 df_final_mod = df_final_mod[df_final_mod[f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)"] <= p_c_in_fr_ue]
                 filtres["p_c_in_fr_ue"] = f"{p_c_in_fr_ue}%"
 
-            filter_by_igpc_rank = st.checkbox(f"Filtrer les produits selon le rang IGPC (indice de centralité d'AIPNET)", key="filter_by_igpc_rank", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
+            filter_by_igpc_rank = st.checkbox(f"Filtrer les produits selon le rang IGPC (score de centralité d'AIPNET)", key="filter_by_igpc_rank", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
             if filter_by_igpc_rank:
                 if type == "imp":
                     igpc_rank = st.slider(f"Rang IGPC supérieur à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
