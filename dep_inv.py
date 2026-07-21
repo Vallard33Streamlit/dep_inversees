@@ -8,12 +8,6 @@ from io import BytesIO
 from openpyxl.styles import Font, PatternFill
 from openpyxl.styles import Alignment
 
-# import psutil
-# import os
-
-# def get_memory_usage():
-#     process = psutil.Process(os.getpid())
-#     return process.memory_info().rss / (1024 ** 2)  # en Mo
 
 version_baci = "2026"
 annee_baci = "2024"
@@ -76,6 +70,13 @@ def load_labels():
         dic["children"] = children
         labels_sections_tree.append(dic)
     return pd.read_csv("labels_hs6.csv", dtype={"Code HS6": str}), labels_sections, labels_sections_tree, list(labels_sections.loc[(labels_sections["Niveau"] == "HS2")&(labels_sections["Catégorie"] >= "25"), "Catégorie"].index)
+
+@st.cache_data
+def load_aipnet_conv02():
+    aipnet = pd.read_excel("AIPNET_Data_Pack_20241204.xlsx", sheet_name="1a. Node List 6-digit HS02")[["hs_code_6d", "IGPC", "IGPC_rank"]]
+    conv02 = pd.read_excel("HS2022toHS2002ConversionAndCorrelationTables.xlsx", sheet_name="HS2022-HS2002 Conversions")[["From HS 2022", "From HS 2002"]]
+    return aipnet, conv02
+            
 
 def calc_baci2(countries_config):
     baci2 = load_baci().merge(countries_config.loc[countries_config["zone"].notna(), ["country_code", "zone"]], left_on="i", right_on="country_code", how="left")
@@ -220,6 +221,10 @@ with st.expander("**Éditer les zones d'influence**", expanded=True):
                 st.session_state.fr_ue = c_config.loc[c_config["country_code"] == 251, "zone"].iloc[0]
             st.session_state.baci2 = calc_baci2(c_config)
             st.session_state.df_m = calc_var("imp", 0).merge(calc_var("exp", 0), how="outer")
+            aipnet, conv02 = load_aipnet_conv02()
+            st.session_state.df_m = st.session_state.df_m.merge(conv02, how="left", left_on="k", right_on="From HS 2022")
+            st.session_state.df_m.loc[st.session_state.df_m["From HS 2002"].isna(), "From HS 2002"] = 271000
+            st.session_state.df_m = st.session_state.df_m.merge(aipnet, how="left", left_on="From HS 2002", right_on="hs_code_6d").drop(columns=["From HS 2022", "From HS 2002", "hs_code_6d"])
             st.session_state.modified_z_infl = False
             
 
@@ -264,6 +269,7 @@ if not st.session_state.modified_z_infl:
                     "Part du premier importateur mondial (en %)", "Part du deuxième importateur mondial (en %)", "Part du troisième importateur mondial (en %)",
                     "Premier importateur mondial", "Deuxième importateur mondial", "Troisième importateur mondial",
                     f"Part des importations de {st.session_state.fr_ue_lab} dans le monde (en %)",
+                    "IGPC", "IGPC_rank",
                     "Label HS6", "Code HS4", "Label HS4"]
                 l_cols = ["Code HS6", "Label HS6",
                     f"Part des exportations de {st.session_state.fr_ue_lab} dans les importations du pays (en %)", f"Part des importations du pays dans les exportations de {st.session_state.fr_ue_lab} (en %)", "HHi des importations du pays",
@@ -273,7 +279,7 @@ if not st.session_state.modified_z_infl:
                     "Exportations du pays", "Quantités exportées du pays",
                     "Valeur des flux échangés dans le monde", "Quantités échangées dans le monde",
                     f"Part des exportations de {st.session_state.fr_ue_lab} dans le monde (en %)", f"Part des importations de {st.session_state.fr_ue_lab} dans le monde (en %)",
-                    "Code HS4", "Label HS4",
+                    "Code HS4", "Label HS4", "IGPC", "IGPC_rank",
                     "Part du premier exportateur dans les importations du pays (en %)", "Part du deuxième exportateur dans les importations du pays (en %)", "Part du troisième exportateur dans les importations du pays (en %)",          
                     "Part du premier importateur dans les exportations du pays (en %)", "Part du deuxième importateur dans les exportations du pays (en %)", "Part du troisième importateur dans les exportations du pays (en %)", 
                     "Part du premier exportateur mondial (en %)", "Part du deuxième exportateur mondial (en %)", "Part du troisième exportateur mondial (en %)",
@@ -317,7 +323,7 @@ if not st.session_state.modified_z_infl:
                 f"HHi des {type2}ortations mondiales", f"{maj(type)}ortations du pays", f"Quantités {type}ortées du pays", f"{maj(type2)}ortations du pays", f"Quantités {type2}ortées du pays",
                 "Valeur des flux échangés dans le monde", "Quantités échangées dans le monde",
                 f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans le monde (en %)",
-                "Code HS4", "Label HS4",
+                "Code HS4", "Label HS4", "IGPC", "IGPC_rank",
                 f"Part du premier {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du deuxième {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du troisième {type2}ortateur dans les {type}ortations du pays (en %)",          
                 f"Part du premier {type2}ortateur mondial (en %)", f"Part du deuxième {type2}ortateur mondial (en %)", f"Part du troisième {type2}ortateur mondial (en %)",
                 f"Premier {type2}ortateur dans les {type}ortations du pays", f"Deuxième {type2}ortateur dans les {type}ortations du pays", f"Troisième {type2}ortateur dans les {type}ortations du pays", 
@@ -362,7 +368,6 @@ if not st.session_state.modified_z_infl:
         st.dataframe(df_final_mod)
 
         st.write("**Exportations :**")
-        # nom_fichier = st.text_input("Nom du fichier à télécharger (sans extension) :", value=f"dependances_inversees_{"_".join(selected_country.split(" "))}{type_produit}", key=f"nom_fichier_{selected_country}{type_produit}")
         nom_fichier = st.text_input("Nom du fichier à télécharger (sans extension) :", value=f"dependances_inversees_{selected_country.replace(' ', '_')}{type_produit}", key=f"nom_fichier_{selected_country}{type_produit}")
         st.download_button(
             label="📥 Télécharger le tableau filtré en csv (sans les métadonnées et informations sur les filtres)",
@@ -487,20 +492,3 @@ if not st.session_state.modified_z_infl:
                 file_name=f"{nom_fichier}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-
-
-# # Affiche la mémoire dans la sidebar
-# st.sidebar.markdown("### 📊 Mémoire utilisée")
-# st.sidebar.write(f"**{get_memory_usage():.1f} Mo** / ~1.5 Go (limite Streamlit Cloud)")
-# def memory_df(df, name="df"):
-#     size = df.memory_usage(deep=True).sum() / 1024**2
-#     st.sidebar.write(f"{name}: {size:.2f} Mo")
-# memory_df(st.session_state.baci2, "baci2")
-# memory_df(st.session_state.df_final, "df_final")
-# memory_df(st.session_state.df_m, "df_m")
-# import gc
-# st.sidebar.write("avant", get_memory_usage())
-
-# gc.collect()
-
-# st.sidebar.write("après", get_memory_usage())
