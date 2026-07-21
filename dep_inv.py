@@ -12,6 +12,9 @@ from openpyxl.styles import Alignment
 version_baci = "2026"
 annee_baci = "2024"
 version_hs6 = "2022"
+version_aipnet = "04-Dec-2024"
+nomenclature_aipnet = "HS6 2002"
+
 def get_explication_filtre(filtre, type, type2):
     if filtre == "hhi_c" :
         return f"L'indice HHI des {type}ortations mesure la concentration des {type}ortations d'un pays entre ses partenaires. Un indice élevé indique une forte dépendance à un petit nombre de pays {type2}ortateurs, tandis qu'un indice faible traduit une plus grande diversification."
@@ -406,6 +409,8 @@ if not st.session_state.modified_z_infl:
                     ("Année", annee_baci),
                     ("Version HS6", version_hs6),
                     ("Pays étudié", selected_country),
+                    ("Version AIPNET", version_aipnet),
+                    ("Nomenclature utilisée pour AIPNET", nomenclature_aipnet)
                 ]
 
                 for cle, valeur in infos:
