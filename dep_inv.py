@@ -24,6 +24,8 @@ def get_explication_filtre(filtre, type, type2):
         return f"La part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays mesure l'impact direct qu'une restriction de {st.session_state.fr_ue_lab} sur ses {type2}ortations aura sur les {type}ortations du pays étudié."
     elif filtre == "p_c_in_fr_ue" :
         return f"La part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} mesure l'impact direct qu'une restriction de {st.session_state.fr_ue_lab} sur ses {type2}ortations envers le pays étudié aura sur ses propres {type2}ortations."
+    elif filtre == "igpc_rank":
+        return "Le score IGPC représente la centralité du produit dans les chaînes de valeurs mondiales. Plus le rang est proche de 100 plus le produit est central, plus il est proche de 0 moins il est central. Cette centralité est mesurée dans le papier AIPNET grâce à une reconstitution d'un graphe des chaînes de valeur par IA et grâce à la part du marché mondiale et la concentration du marché de chaque produit."
     else :
         return ""
     
@@ -359,7 +361,18 @@ if not st.session_state.modified_z_infl:
                 p_c_in_fr_ue = st.slider(f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
                 df_final_mod = df_final_mod[df_final_mod[f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)"] <= p_c_in_fr_ue]
                 filtres["p_c_in_fr_ue"] = f"{p_c_in_fr_ue}%"
-                            
+
+            filter_by_igpc_rank = st.checkbox(f"Filtrer les produits selon le rang IGPC (indice de centralité d'AIPNET)", key="filter_by_igpc_rank", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
+            if filter_by_igpc_rank:
+                if type == "imp":
+                    igpc_rank = st.slider(f"Rang IGPC supérieur à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
+                    df_final_mod = df_final_mod[(df_final_mod["IGPC_rank"] >= igpc_rank) | (df_final_mod[f"IGPC_rank"].isna())]
+                    filtres["igpc_rank"] = str(igpc_rank)
+                else :
+                    igpc_rank = st.slider(f"Rang IGPC inférieur à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
+                    df_final_mod = df_final_mod[(df_final_mod["IGPC_rank"] <= igpc_rank) | (df_final_mod[f"IGPC_rank"].isna())]
+                    filtres["igpc_rank"] = str(igpc_rank)
+
             log_values = np.linspace(-3, 6, 901)
             filter_by_v = st.checkbox(f"Filtrer les produits selon le montant des {type}ortations du pays :", key="filter_by_v")
             if filter_by_v:
@@ -439,7 +452,10 @@ if not st.session_state.modified_z_infl:
                            "p_fr_ue_in_c" : f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à",
                            "p_c_in_fr_ue" : f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à",
                            "v" : f"Montant des {type}ortations du pays supérieur à"}
-            
+                    if type == "imp":
+                        lab_filtres["igpc_rank"]  = "Rang IGPC supérieur à"
+                    else:
+                        lab_filtres["igpc_rank"]  = "Rang IGPC inférieur à"
                     ws[f"A{row}"] = "Filtres appliqués"
                     ws[f"A{row}"].font = bold
                     ws[f"B{row}"] = "Valeur"
