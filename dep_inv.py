@@ -306,79 +306,86 @@ if not st.session_state.modified_z_infl:
             selected_categories_index = sac.tree(labels_sections_tree, index = checked_sections, open_index=[], checkbox=True, return_index = True, key="labels_sections_tree", height=500)
             selected_categories = labels_sections.loc[selected_categories_index, "Catégorie"].values
             df_final_mod = df_final_mod[df_final_mod["Code HS6"].apply(lambda x : x[:2] in selected_categories)]
-
+        
+        approche_filter = st.radio(
+            "Approche :",
+            options=["Par les importations", "Par les exportations"],
+            index=0
+        )
+        if approche_filter == "Par les importations":
+            type, type2 = "imp", "exp"
+            type_produit = "_importations"
+        else:
+            type, type2 = "exp", "imp"
+            type_produit = "_exportations"
+        filtres= {}
+        filtres["approche_filter"] = approche_filter
+        
         type_filter = st.radio(
             "S'intéresser aux produits :",
             options=["Tous", "Tels que le pays est importateur net", "Tels que le pays est exportateur net"],
             index=0
         )
         if type_filter == "Tels que le pays est importateur net":
-            type, type2 = "imp", "exp"
-            type_produit = "_importations"
-        elif type_filter == "Tels que le pays est exportateur net":
-            type, type2 = "exp", "imp"
-            type_produit = "_exportations"
-        else :
-            type_produit = ""
-
-        filtres= {}
-        if type_filter != "Tous":
+            df_final_mod = df_final_mod[(df_final_mod["Importations du pays"] >= df_final_mod["Exportations du pays"])&(df_final_mod["Importations du pays"] > 0)]
             filtres["type_filter"] = type_filter
-            l_cols_2 = ["Code HS6", "Label HS6",
-                f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)", f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)", f"HHi des {type}ortations du pays",
-                f"HHi des {type2}ortations mondiales", f"{maj(type)}ortations du pays", f"Quantités {type}ortées du pays", f"{maj(type2)}ortations du pays", f"Quantités {type2}ortées du pays",
-                "Valeur des flux échangés dans le monde", "Quantités échangées dans le monde",
-                f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans le monde (en %)",
-                "Code HS4", "Label HS4", "IGPC", "IGPC_rank",
-                f"Part du premier {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du deuxième {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du troisième {type2}ortateur dans les {type}ortations du pays (en %)",          
-                f"Part du premier {type2}ortateur mondial (en %)", f"Part du deuxième {type2}ortateur mondial (en %)", f"Part du troisième {type2}ortateur mondial (en %)",
-                f"Premier {type2}ortateur dans les {type}ortations du pays", f"Deuxième {type2}ortateur dans les {type}ortations du pays", f"Troisième {type2}ortateur dans les {type}ortations du pays", 
-                f"Premier {type2}ortateur mondial", f"Deuxième {type2}ortateur mondial", f"Troisième {type2}ortateur mondial"]
+        elif type_filter == "Tels que le pays est exportateur net":
+            df_final_mod = df_final_mod[(df_final_mod["Exportations du pays"] >= df_final_mod["Importations du pays"])&(df_final_mod["Exportations du pays"] > 0)]
+            filtres["type_filter"] = type_filter
 
-            df_final_mod = df_final_mod[(df_final_mod[f"{maj(type)}ortations du pays"] >= df_final_mod[f"{maj(type2)}ortations du pays"])&(df_final_mod[f"{maj(type)}ortations du pays"] > 0)]
-            df_final_mod = df_final_mod[l_cols_2]
-        
-            filter_by_hhi_c = st.checkbox(f"Filtrer les produits selon l'indice HHi des {type}ortations du pays", key="filter_by_hhi_c", help=get_explication_filtre("hhi_c", type, type2))
-            if filter_by_hhi_c:
-                hhi_c = st.slider(f"HHi des {type}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
-                df_final_mod = df_final_mod[df_final_mod[f"HHi des {type}ortations du pays"] >= hhi_c]
-                filtres["hhi_c"] = hhi_c
+        l_cols_2 = ["Code HS6", "Label HS6",
+            f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)", f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)", f"HHi des {type}ortations du pays",
+            f"HHi des {type2}ortations mondiales", f"{maj(type)}ortations du pays", f"Quantités {type}ortées du pays", f"{maj(type2)}ortations du pays", f"Quantités {type2}ortées du pays",
+            "Valeur des flux échangés dans le monde", "Quantités échangées dans le monde",
+            f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans le monde (en %)",
+            "Code HS4", "Label HS4", "IGPC", "IGPC_rank",
+            f"Part du premier {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du deuxième {type2}ortateur dans les {type}ortations du pays (en %)", f"Part du troisième {type2}ortateur dans les {type}ortations du pays (en %)",          
+            f"Part du premier {type2}ortateur mondial (en %)", f"Part du deuxième {type2}ortateur mondial (en %)", f"Part du troisième {type2}ortateur mondial (en %)",
+            f"Premier {type2}ortateur dans les {type}ortations du pays", f"Deuxième {type2}ortateur dans les {type}ortations du pays", f"Troisième {type2}ortateur dans les {type}ortations du pays", 
+            f"Premier {type2}ortateur mondial", f"Deuxième {type2}ortateur mondial", f"Troisième {type2}ortateur mondial"]
+        df_final_mod = df_final_mod[l_cols_2]
+    
+        filter_by_hhi_c = st.checkbox(f"Filtrer les produits selon l'indice HHi des {type}ortations du pays", key="filter_by_hhi_c", help=get_explication_filtre("hhi_c", type, type2))
+        if filter_by_hhi_c:
+            hhi_c = st.slider(f"HHi des {type}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
+            df_final_mod = df_final_mod[df_final_mod[f"HHi des {type}ortations du pays"] >= hhi_c]
+            filtres["hhi_c"] = hhi_c
 
-            filter_by_hhi_m = st.checkbox(f"Filtrer les produits selon l'indice HHi mondial des {type2}ortations", key="filter_by_hhi_m", help=get_explication_filtre("hhi_M", type, type2))
-            if filter_by_hhi_m:
-                hhi_M = st.slider(f"HHi mondial des {type2}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
-                df_final_mod = df_final_mod[df_final_mod[f"HHi des {type2}ortations mondiales"] >= hhi_M]
-                filtres["hhi_M"] = hhi_M
+        filter_by_hhi_m = st.checkbox(f"Filtrer les produits selon l'indice HHi mondial des {type2}ortations", key="filter_by_hhi_m", help=get_explication_filtre("hhi_M", type, type2))
+        if filter_by_hhi_m:
+            hhi_M = st.slider(f"HHi mondial des {type2}ortations supérieur à :", min_value=0.0, max_value=1.0, value=0.25, step=0.01, format="%.2f")
+            df_final_mod = df_final_mod[df_final_mod[f"HHi des {type2}ortations mondiales"] >= hhi_M]
+            filtres["hhi_M"] = hhi_M
 
-            filter_by_p_fr_ue_in_c = st.checkbox(f"Filtrer les produits selon la part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays", key="filter_by_p_fr_ue_in_c", help=get_explication_filtre("p_fr_ue_in_c", type, type2))
-            if filter_by_p_fr_ue_in_c:
-                p_fr_ue_in_c = st.slider(f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à :", min_value=0, max_value=100, value=10, step=1, format="%d %%")
-                df_final_mod = df_final_mod[df_final_mod[f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)"] >= p_fr_ue_in_c]
-                filtres["p_fr_ue_in_c"] = f"{p_fr_ue_in_c}%"
+        filter_by_p_fr_ue_in_c = st.checkbox(f"Filtrer les produits selon la part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays", key="filter_by_p_fr_ue_in_c", help=get_explication_filtre("p_fr_ue_in_c", type, type2))
+        if filter_by_p_fr_ue_in_c:
+            p_fr_ue_in_c = st.slider(f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à :", min_value=0, max_value=100, value=10, step=1, format="%d %%")
+            df_final_mod = df_final_mod[df_final_mod[f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)"] >= p_fr_ue_in_c]
+            filtres["p_fr_ue_in_c"] = f"{p_fr_ue_in_c}%"
 
-            filter_by_p_c_in_fr_ue = st.checkbox(f"Filtrer les produits selon la part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}", key="filter_by_p_c_in_fr_ue", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
-            if filter_by_p_c_in_fr_ue:
-                p_c_in_fr_ue = st.slider(f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
-                df_final_mod = df_final_mod[df_final_mod[f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)"] <= p_c_in_fr_ue]
-                filtres["p_c_in_fr_ue"] = f"{p_c_in_fr_ue}%"
+        filter_by_p_c_in_fr_ue = st.checkbox(f"Filtrer les produits selon la part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab}", key="filter_by_p_c_in_fr_ue", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
+        if filter_by_p_c_in_fr_ue:
+            p_c_in_fr_ue = st.slider(f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à :", min_value=0, max_value=100, value=50, step=1, format="%d %%")
+            df_final_mod = df_final_mod[df_final_mod[f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)"] <= p_c_in_fr_ue]
+            filtres["p_c_in_fr_ue"] = f"{p_c_in_fr_ue}%"
 
-            filter_by_igpc_rank = st.checkbox(f"Filtrer les produits selon le rang IGPC (score de centralité d'AIPNET)", key="filter_by_igpc_rank", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
-            if filter_by_igpc_rank:
-                if type == "imp":
-                    igpc_rank = st.slider(f"Rang IGPC supérieur à :", min_value=0, max_value=100, value=50, step=1)
-                    df_final_mod = df_final_mod[(df_final_mod["IGPC_rank"] >= igpc_rank) | (df_final_mod[f"IGPC_rank"].isna())]
-                    filtres["igpc_rank"] = str(igpc_rank)
-                else :
-                    igpc_rank = st.slider(f"Rang IGPC inférieur à :", min_value=0, max_value=100, value=50, step=1)
-                    df_final_mod = df_final_mod[(df_final_mod["IGPC_rank"] <= igpc_rank) | (df_final_mod[f"IGPC_rank"].isna())]
-                    filtres["igpc_rank"] = str(igpc_rank)
+        filter_by_igpc_rank = st.checkbox(f"Filtrer les produits selon le rang IGPC (score de centralité d'AIPNET)", key="filter_by_igpc_rank", help=get_explication_filtre("p_c_in_fr_ue", type, type2))
+        if filter_by_igpc_rank:
+            if type == "imp":
+                igpc_rank = st.slider(f"Rang IGPC supérieur à :", min_value=0, max_value=100, value=50, step=1)
+                df_final_mod = df_final_mod[(df_final_mod["IGPC_rank"] >= igpc_rank) | (df_final_mod[f"IGPC_rank"].isna())]
+                filtres["igpc_rank"] = str(igpc_rank)
+            else :
+                igpc_rank = st.slider(f"Rang IGPC inférieur à :", min_value=0, max_value=100, value=50, step=1)
+                df_final_mod = df_final_mod[(df_final_mod["IGPC_rank"] <= igpc_rank) | (df_final_mod[f"IGPC_rank"].isna())]
+                filtres["igpc_rank"] = str(igpc_rank)
 
-            log_values = np.linspace(-3, 6, 901)
-            filter_by_v = st.checkbox(f"Filtrer les produits selon le montant des {type}ortations du pays :", key="filter_by_v")
-            if filter_by_v:
-                log_value_v = st.select_slider(f"Montant des {type}ortations (en 1000$) supérieur à :", options=log_values, value=0, format_func=lambda x: f"{10**x:.3f}")
-                df_final_mod = df_final_mod[df_final_mod[f"{maj(type)}ortations du pays"] >= 10**log_value_v]
-                filtres["v"] = f"{10**log_value_v * 1000}$"
+        log_values = np.linspace(-3, 6, 901)
+        filter_by_v = st.checkbox(f"Filtrer les produits selon le montant des {type}ortations du pays :", key="filter_by_v")
+        if filter_by_v:
+            log_value_v = st.select_slider(f"Montant des {type}ortations (en 1000$) supérieur à :", options=log_values, value=0, format_func=lambda x: f"{10**x:.3f}")
+            df_final_mod = df_final_mod[df_final_mod[f"{maj(type)}ortations du pays"] >= 10**log_value_v]
+            filtres["v"] = f"{10**log_value_v * 1000}$"
             
         st.subheader("Résultats")
         st.write(f"Il y a {len(df_final_mod)} produits (HS6)")
@@ -445,33 +452,34 @@ if not st.session_state.modified_z_infl:
                         row += 1
 
                     row += 1
-                if filtres:
-                    lab_filtres = {"type_filter" : "Produits",
-                           "hhi_c" : f"HHi des {type}ortations supérieur à",
-                           "hhi_M" : f"HHi mondial des {type2}ortations supérieur à",
-                           "p_fr_ue_in_c" : f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à",
-                           "p_c_in_fr_ue" : f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à",
-                           "v" : f"Montant des {type}ortations du pays supérieur à"}
-                    if type == "imp":
-                        lab_filtres["igpc_rank"]  = "Rang IGPC supérieur à"
-                    else:
-                        lab_filtres["igpc_rank"]  = "Rang IGPC inférieur à"
-                    ws[f"A{row}"] = "Filtres appliqués"
-                    ws[f"A{row}"].font = bold
-                    ws[f"B{row}"] = "Valeur"
-                    ws[f"B{row}"].font = bold
-                    row_filtre = row
-                    row += 1
+                
+                lab_filtres = {"approche_filter" : "Approche",
+                        "type_filter" : "Produits",
+                        "hhi_c" : f"HHi des {type}ortations supérieur à",
+                        "hhi_M" : f"HHi mondial des {type2}ortations supérieur à",
+                        "p_fr_ue_in_c" : f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à",
+                        "p_c_in_fr_ue" : f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} inférieure à",
+                        "v" : f"Montant des {type}ortations du pays supérieur à"}
+                if type == "imp":
+                    lab_filtres["igpc_rank"]  = "Rang IGPC supérieur à"
+                else:
+                    lab_filtres["igpc_rank"]  = "Rang IGPC inférieur à"
+                ws[f"A{row}"] = "Filtres appliqués"
+                ws[f"A{row}"].font = bold
+                ws[f"B{row}"] = "Valeur"
+                ws[f"B{row}"].font = bold
+                row_filtre = row
+                row += 1
 
-                    for filtre, seuil in filtres.items():
-                        ws[f"A{row}"] = lab_filtres.get(filtre, "")
-                        ws[f"B{row}"] = seuil
-                        ws[f"C{row}"] = get_explication_filtre(filtre, type, type2)
-                        if len(get_explication_filtre(filtre, type, type2)) > 0:
-                            ws[f"C{row_filtre}"] = "Explications"
-                            ws[f"C{row_filtre}"].font = bold
-                        row += 1
+                for filtre, seuil in filtres.items():
+                    ws[f"A{row}"] = lab_filtres.get(filtre, "")
+                    ws[f"B{row}"] = seuil
+                    ws[f"C{row}"] = get_explication_filtre(filtre, type, type2)
+                    if len(get_explication_filtre(filtre, type, type2)) > 0:
+                        ws[f"C{row_filtre}"] = "Explications"
+                        ws[f"C{row_filtre}"].font = bold
                     row += 1
+                row += 1
                 
                 vert = PatternFill(fill_type="solid", fgColor="C6EFCE")
                 orange = PatternFill(fill_type="solid", fgColor="FFF2CC")
