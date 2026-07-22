@@ -265,7 +265,7 @@ if not st.session_state.modified_z_infl:
                     "Part du premier importateur dans les exportations du pays (en %)", "Part du deuxième importateur dans les exportations du pays (en %)", "Part du troisième importateur dans les exportations du pays (en %)", 
                     "Premier importateur dans les exportations du pays", "Deuxième importateur dans les exportations du pays", "Troisième importateur dans les exportations du pays",
                     f"Part des importations de {st.session_state.fr_ue_lab} dans les exportations du pays (en %)", f"Part des exportations du pays dans les importations de {st.session_state.fr_ue_lab} (en %)", 
-                    "Valeur des flux échangés dans le monde (en 1000$)", "Quantités échangées dans le monde", "HHi des exportations mondiales",
+                    "Valeur des flux échangés dans le monde (en 1000$)", "Quantités échangées dans le monde (en tonnes)", "HHi des exportations mondiales",
                     "Part du premier exportateur mondial (en %)", "Part du deuxième exportateur mondial (en %)", "Part du troisième exportateur mondial (en %)",
                     "Premier exportateur mondial", "Deuxième exportateur mondial", "Troisième exportateur mondial",
                     f"Part des exportations de {st.session_state.fr_ue_lab} dans le monde (en %)",
