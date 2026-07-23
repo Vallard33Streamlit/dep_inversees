@@ -16,7 +16,7 @@ nomenclature_aipnet = "HS6 2002"
 
 def get_explication_filtre(filtre, type, type2):
     if filtre == "hhi_c" :
-        return f"TEST L'indice HHI des {type}ortations mesure la concentration des {type}ortations d'un pays entre ses partenaires. Un indice élevé indique une forte dépendance à un petit nombre de pays {type2}ortateurs, tandis qu'un indice faible traduit une plus grande diversification."
+        return f"TEST2 L'indice HHI des {type}ortations mesure la concentration des {type}ortations d'un pays entre ses partenaires. Un indice élevé indique une forte dépendance à un petit nombre de pays {type2}ortateurs, tandis qu'un indice faible traduit une plus grande diversification."
     elif filtre == "hhi_M" :
         return f"L'indice HHI des {type2}ortations mesure la concentration des {type2}ortations dans le monde. Un indice élevé indique une forte dépendance mondiale à un petit nombre de pays {type2}ortateurs, tandis qu'un indice faible traduit une plus grande diversification."
     elif filtre == "p_fr_ue_in_c" :
