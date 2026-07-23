@@ -386,7 +386,7 @@ if not st.session_state.modified_z_infl:
             filter_by_v = st.checkbox(f"Filtrer les produits selon le montant des {type}ortations du pays :", key="filter_by_v")
             if filter_by_v:
                 log_value_v = st.select_slider(f"Montant des {type}ortations (en 1000$) supérieur à :", options=log_values, value=0, format_func=lambda x: f"{10**x:.3f}")
-                df_final_mod = df_final_mod[df_final_mod[f"{maj(type)}ortations du pays"] >= 10**log_value_v]
+                df_final_mod = df_final_mod[df_final_mod[f"{maj(type)}ortations du pays (en 1000$)"] >= 10**log_value_v]
                 filtres["v"] = f"{10**log_value_v * 1000}$"
             
         st.subheader("Résultats")
