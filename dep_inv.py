@@ -24,7 +24,7 @@ def get_explication_filtre(filtre, type, type2):
     elif filtre == "p_c_in_fr_ue" :
         return f"La part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} mesure l'impact direct qu'une restriction de {st.session_state.fr_ue_lab} sur ses {type2}ortations envers le pays étudié aura sur ses propres {type2}ortations."
     elif filtre == "igpc_rank":
-        return "Le score IGPC représente la centralité du produit dans les chaînes de valeurs mondiales. Plus le rang est proche de 100 plus le produit est central, plus il est proche de 0 moins il est central. Cette centralité est mesurée dans le papier AIPNET grâce à une reconstitution d'un graphe des chaînes de valeur par IA et grâce à la part de marché mondiale et la concentration du marché de chaque produit."
+        return "Le score IGPC représente la centralité du produit dans les chaînes de valeurs mondiales. Plus le rang est proche de 100 plus le produit est central, plus il est proche de 0 moins il est central. Cette centralité est mesurée dans le papier AIPNET grâce à une reconstitution d'un graphe des chaînes de valeur par IA et grâce à la part du marché mondiale et la concentration du marché de chaque produit."
     else :
         return ""
     
@@ -329,10 +329,10 @@ if not st.session_state.modified_z_infl:
             index=0
         )
         if type_filter == "Tels que le pays est importateur net":
-            df_final_mod = df_final_mod[(df_final_mod["Importations du pays"] >= df_final_mod["Exportations du pays"])&(df_final_mod["Importations du pays"] > 0)]
+            df_final_mod = df_final_mod[(df_final_mod["Importations du pays (en 1000$)"] >= df_final_mod["Exportations du pays (en 1000$)"])&(df_final_mod["Importations du pays (en 1000$)"] > 0)]
             filtres["type_filter"] = type_filter
         elif type_filter == "Tels que le pays est exportateur net":
-            df_final_mod = df_final_mod[(df_final_mod["Exportations du pays"] >= df_final_mod["Importations du pays"])&(df_final_mod["Exportations du pays"] > 0)]
+            df_final_mod = df_final_mod[(df_final_mod["Exportations du pays (en 1000$)"] >= df_final_mod["Importations du pays (en 1000$)"])&(df_final_mod["Exportations du pays (en 1000$)"] > 0)]
             filtres["type_filter"] = type_filter
         if approche_filter != "Pas d'approche" :
             l_cols_2 = ["Code HS6", "Label HS6",
