@@ -322,19 +322,14 @@ if not st.session_state.modified_z_infl:
             filtres["approche_filter"] = approche_filter
         else :
             type_produit = ""
-        
-        type_filter = st.radio(
-            "S'intéresser aux produits :",
-            options=["Tous", "Tels que le pays est importateur net", "Tels que le pays est exportateur net"],
-            index=0
-        )
-        if type_filter == "Tels que le pays est importateur net":
-            df_final_mod = df_final_mod[(df_final_mod["Importations du pays (en 1000$)"] >= df_final_mod["Exportations du pays (en 1000$)"])&(df_final_mod["Importations du pays (en 1000$)"] > 0)]
-            filtres["type_filter"] = type_filter
-        elif type_filter == "Tels que le pays est exportateur net":
-            df_final_mod = df_final_mod[(df_final_mod["Exportations du pays (en 1000$)"] >= df_final_mod["Importations du pays (en 1000$)"])&(df_final_mod["Exportations du pays (en 1000$)"] > 0)]
-            filtres["type_filter"] = type_filter
+
         if approche_filter != "Pas d'approche" :
+            filter_by_type = st.checkbox(f"Filtrer les produits selon le ratio {type}ortations du pays sur {type2}ortations du pays", key="filter_by_type")
+            if filter_by_type:
+                ratio_type = st.slider(f"Ratio {type}ortations du pays sur {type2}ortations du pays supérieur à :", min_value=0., max_value=10., value=1., step=0.1)
+                df_final_mod = df_final_mod[(df_final_mod[f"{maj(type)}ortations du pays (en 1000$)"] >= ratio_type * df_final_mod[f"{maj(type2)}ortations du pays (en 1000$)"])&(df_final_mod[f"{maj(type)}ortations du pays (en 1000$)"] > 0)]
+                filtres["ratio_type"] = ratio_type
+
             l_cols_2 = ["Code HS6", "Label HS6",
                 f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays (en %)", f"Part des {type}ortations du pays dans les {type2}ortations de {st.session_state.fr_ue_lab} (en %)", f"HHi des {type}ortations du pays",
                 f"HHi des {type2}ortations mondiales", f"{maj(type)}ortations du pays (en 1000$)", f"Quantités {type}ortées du pays (en tonnes)", f"{maj(type2)}ortations du pays (en 1000$)", f"Quantités {type2}ortées du pays (en tonnes)",
@@ -456,7 +451,7 @@ if not st.session_state.modified_z_infl:
                     row += 1
                 if filtres :
                     lab_filtres = {"approche_filter" : "Approche",
-                            "type_filter" : "Produits",
+                            "ratio_type" : f"Ratio {type}ortations du pays sur {type2}ortations du pays supérieur à :",
                             "hhi_c" : f"HHi des {type}ortations supérieur à",
                             "hhi_M" : f"HHi mondial des {type2}ortations supérieur à",
                             "p_fr_ue_in_c" : f"Part des {type2}ortations de {st.session_state.fr_ue_lab} dans les {type}ortations du pays supérieure à",
